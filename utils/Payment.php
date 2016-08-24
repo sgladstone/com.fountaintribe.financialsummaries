@@ -27,7 +27,7 @@
     $currency_symbol = "";
 
     //$tmp_contrib_type_ids_for_sql = 	getContributionTypeWhereClauseForSQL( $ct_type_prefix_id);
-    require_once('utils/finance/FinancialCategory.php') ;
+    require_once('utils/FinancialCategory.php') ;
 	
 	$tmpFinancialCategory = new FinancialCategory();
 	
@@ -57,7 +57,7 @@ $error_msg = getCustomTableFieldNames($custom_field_group_label, $customFieldLab
 $third_party_col_name  =  $outCustomColumnNames[$custom_field_third_party_label];
 
  if(strlen( $third_party_col_name) == 0){
-       print "<br>Error: There is no field with the name: '$custom_field_third_party_label' ";
+      // print "<br>Error: There is no field with the name: '$custom_field_third_party_label' ";
        return; 
  }
 
@@ -522,11 +522,13 @@ $dao =& CRM_Core_DAO::executeQuery( $sql_str,   CRM_Core_DAO::$_nullArray ) ;
    
    $cid_list =  $tmpRelTools->get_contact_ids_for_sql($contactIDs) ; 
 
-    $fiscal_start_date	= get_current_fiscal_year_start_date() ; 
+   require_once 'utils/FinancialDates.php';
+   $finDates = new FinancialDates();
+    $fiscal_start_date	= $finDates->get_current_fiscal_year_start_date() ; 
     $currency_symbol = "";
 
     //$tmp_contrib_type_ids_for_sql = 	getContributionTypeWhereClauseForSQL( $ct_type_prefix_id);
-    require_once('utils/finance/FinancialCategory.php') ;
+    require_once('utils/FinancialCategory.php') ;
 	
 	$tmpFinancialCategory = new FinancialCategory();
 	
@@ -556,7 +558,7 @@ $error_msg = getCustomTableFieldNames($custom_field_group_label, $customFieldLab
 $third_party_col_name  =  $outCustomColumnNames[$custom_field_third_party_label];
 
  if(strlen( $third_party_col_name) == 0){
-       print "<br>Error: There is no field with the name: '$custom_field_third_party_label' ";
+      // print "<br>Error: There is no field with the name: '$custom_field_third_party_label' ";
        return; 
  }
 

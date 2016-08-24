@@ -2,6 +2,48 @@
 
 require_once 'financialsummaries.civix.php';
 
+function financialsummaries_civicrm_tabs( &$tabs, $contactID ) {
+// if (pogstone_is_user_authorized('access CiviContribute')){
+	if ( 1==1){
+
+
+	$contactIds = array();
+	$contactIds[] = $contactID;
+
+	$token_format = "backoffice_screen";
+
+	require_once ('utils/FinancialUtils.php');
+	$tmpFinancialUtils = new FinancialUtils();
+	$ct_prefix_id = "0";   // get all contribution type data.
+	 
+	//require_once ('utils/FormattingUtils.php'  );
+	//$tmpFormattingUtils = new FormattingUtils();
+	$token_amount_due_long = 'contact.amount_due';
+	$start_date_tmp = '';
+	$today_date =  date("Ymd");
+	$include_automated_payments = false;
+	$output_wanted = "amount_due";
+
+	$tmpFinancialUtils->process_obligation_with_balances_subtotals_tokens2($values, $contactIds, $ct_prefix_id ,$token_amount_due_long ,  $need_subtotals,  $token_format, $today_date,$default_start_date,  $need_due_column, $default_exclude_after_date, $output_wanted, $include_closed_items, $where_clause_sql );
+
+	$amount_due_by_today = $values[$contactID][$token_amount_due_long];
+	 
+	$count_parm = $amount_due_by_today." due";
+	//$count_parm = "0";
+
+
+	$url = CRM_Utils_System::url( 'civicrm/fountaintribe/fstab',
+			"reset=1&snippet=1&force=1&cid=$contactID" );
+	$tabs[] = array( 'id'    => 'mySupercoolTab',
+			'url'   => $url,
+			'title' => 'Financial Summary',
+			'count' => $count_parm,
+			'weight' => 1 );
+	 
+}
+
+}
+
 /**
  * Implements hook_civicrm_config().
  *
@@ -10,6 +52,8 @@ require_once 'financialsummaries.civix.php';
 function financialsummaries_civicrm_config(&$config) {
   _financialsummaries_civix_civicrm_config($config);
 }
+
+
 
 /**
  * Implements hook_civicrm_xmlMenu().

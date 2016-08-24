@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/fountaintribe/fstab</path>
+    <page_callback>CRM_Financialsummaries_Page_FinSumTab</page_callback>
+    <title>FinSumTab</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>

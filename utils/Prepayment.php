@@ -35,7 +35,7 @@
    $cid_list =  $tmpRelTools->get_contact_ids_for_sql($contactIDs) ; 
    
    //$tmp_contrib_type_ids_for_sql = 	getContributionTypeWhereClauseForSQL( $ct_prefix_id);
-   require_once('utils/finance/FinancialCategory.php') ;
+   require_once('utils/FinancialCategory.php') ;
 	
 	$tmpFinancialCategory = new FinancialCategory();
 	
@@ -248,7 +248,9 @@ $dao =& CRM_Core_DAO::executeQuery( $sql_str,   CRM_Core_DAO::$_nullArray ) ;
   
  
  $format = '';
- populate_default_value(  $values, $contactIDs , $token_to_fill, $token_to_fill,   "Nothing Found for this contact", $format); 
+ require_once ('utils/FinancialUtils.php');
+ $tmpFinUtils = new FinancialUtils(); 
+ $tmpFinUtils->populate_default_value(  $values, $contactIDs , $token_to_fill, $token_to_fill,   "Nothing Found for this contact", $format); 
  
  
   	

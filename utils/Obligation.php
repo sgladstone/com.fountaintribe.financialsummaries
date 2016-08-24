@@ -121,6 +121,8 @@ $original_date_sql_name  =  $outCustomColumnNames[$custom_field_original_date_la
 	
 	////////////////////////////////////////////////////////////////////////////////
 		 
+	require_once 'utils/FinancialDates.php';
+	$finDates = new FinancialDates();
 		 // Make sure we include where clause passed in as a parm.
 		 if(strlen( $extra_where_clause_parm) > 0){
 		 	$tmp_clauses[] =  $extra_where_clause_parm ; 
@@ -136,7 +138,7 @@ $original_date_sql_name  =  $outCustomColumnNames[$custom_field_original_date_la
 			if($exclude_after_date_parm == 'curfiscalyear'){
 				
 				$format = "Ymd";
-				$exclude_after_date_parm = get_first_day_next_fiscal_year($format); 
+				$exclude_after_date_parm = $finDates->get_first_day_next_fiscal_year($format); 
 				$tmp = " DATE_SUB( '".$exclude_after_date_parm."' , INTERVAL 1 DAY) ";
 				
 				
