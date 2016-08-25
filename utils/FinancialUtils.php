@@ -860,6 +860,9 @@ and p.is_test = 0
 		 */
 		//print_r( $include_cols) ;
 		//print "<br>Inside process obligation: ".$ct_prefix_id;
+		$contrib_type_total_due = "";
+		$contrib_type_total_tax_amount = "";
+		$tmp_due_date = "";
 
 		if( count($contactIDs) == 0 ){
 			// no contacts, nothing to do.
@@ -1255,7 +1258,11 @@ and p.is_test = 0
 			// $currency = $dao->currency;
 			$contrib_type = $dao->contrib_type;
 			$source = $dao->source;
-			$recur_paid_so_far = $dao->recur_paid_so_far;
+			if( isset( $dao->recur_paid_so_far )){
+				$recur_paid_so_far = $dao->recur_paid_so_far;
+			}else{
+				$recur_paid_so_far = "0";
+			}
 			$recur_installment_amount = $dao->recur_amount;
 			$recur_installment_number = $dao->recur_installments;
 			$payment_processor_type = $dao->payment_processor_type;
@@ -1275,7 +1282,12 @@ and p.is_test = 0
 			$dao_adjusted = $dao->adjusted;
 			$dao_balance = $dao->balance;
 			$dao_line_item_id = $dao->line_item_id;
-			$dao_tax_amount = $dao->tax_amount;
+			
+			if(isset($dao->tax_amount)){
+				$dao_tax_amount = $dao->tax_amount;
+			}else{
+				$dao_tax_amount = "0";
+			}
 			$dao_amt_due = $dao->amt_due;   // only filled in for contributions, not pledges or recur.
 
 			 
@@ -1526,7 +1538,11 @@ and p.is_test = 0
 				$tmp_row = "\n<tr class=$css_name>";
 				foreach( $include_cols as $col_key => $val){
 					$cur_style = $col_formats[$col_key];
-					$cur_label = $col_labels[$col_key];
+					if(isset($col_labels[$col_key])){
+					   $cur_label = $col_labels[$col_key];
+					}else{
+						$cur_label =  "";
+					}
 					if( $col_key == "description" ){
 						$cur_width = " width='$desc_width' ";
 						 
@@ -1757,7 +1773,11 @@ and p.is_test = 0
 				$tmp_row = "\n<tr><td colspan=$tmp_total_col_count> &nbsp; </td></tr><tr><td $col_span $sub_total_style>Totals:</td>";
 				foreach( $include_cols as $col_key => $val){
 					$cur_style = $col_formats[$col_key];
-					$cur_label = $col_labels[$col_key];
+					if( isset( $col_labels[$col_key] )){
+						$cur_label = $col_labels[$col_key];
+					}else{
+						$cur_label = "";
+					}
 					if( $col_key == "description" ){
 						$cur_width = " width='$desc_width' ";
 						 

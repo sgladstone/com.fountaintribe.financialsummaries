@@ -14,6 +14,7 @@ function get_contact_ids_for_sql($contactIDs){
         foreach ( $contactIDs as $cid ) {
           //$cid_list = $cid_list.$cid;
           $rel_ids = self::get_all_permissioned_ids($cid);
+          $cid_list = ""; 
            //print "<br> rel ids: ";
            //print_r($rel_ids); 
 	   $k = 1;        

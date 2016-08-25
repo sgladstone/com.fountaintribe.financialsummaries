@@ -7,7 +7,7 @@
    	function get_sql_string_for_obligations(&$contactIDs, &$order_by_parm, &$end_date_parm , &$start_date_parm, &$exclude_after_date_parm, 
    	 &$error, &$all_contacts = false, &$get_contact_name  = false, &$extra_where_clause_parm = '', &$extra_groupby_clause = '', &$ct_type_prefix_id = '', 	        &$include_closed_items = true, 
    	&$groups_of_contact = array(), &$mem_types_of_contact = array() , &$mem_orgs_of_contact = array(),  &$columns_needed = "",
-   	&$layout_choice = "", &$financial_types_parm = "", &$general_ledger_codes_parm = "", &$include_prepayments ){
+   	&$layout_choice = "", &$financial_types_parm = "", &$general_ledger_codes_parm = "", &$include_prepayments = "" ){
 
 	//print "<br><br> Inside get sql string for obligations";
 	//print_r( $contactIDs ); 
@@ -23,7 +23,14 @@
 	//print "<br>mem types of contact: ";
 	//print_r($mem_types_of_contact );
 	
-	
+   		$tmp_group_join = "";
+   		$tmp_mem_join = "";
+   		$tmp_extra_cid = "";
+   		$tax_contrib_from_sql ="";
+   		$tmp_group_join_contrib = "";
+   		$tmp_mem_join_contrib = "";
+   		$main_tax_select_sql = "";
+   		
 	//print "<br>mem orgs of contact: ";
 	//print_r($mem_orgs_of_contact );
 	//  Get extra custom field for "Original Obligation date"
@@ -39,7 +46,11 @@ $outCustomColumnNames = array();
 require_once('utils/util_custom_fields.php');
 $error_msg = getCustomTableFieldNames($custom_field_group_label, $customFieldLabels, $extended_contrib_table, $outCustomColumnNames ) ;
 
-$original_date_sql_name  =  $outCustomColumnNames[$custom_field_original_date_label];
+if(isset(  $outCustomColumnNames[$custom_field_original_date_label] )){ 
+	$original_date_sql_name  =  $outCustomColumnNames[$custom_field_original_date_label];
+}else{
+	$original_date_sql_name  = "";
+}
 
 
 // Check For Australian Tax-related custom fields. ( ie GST) as they need extra info.
@@ -327,7 +338,11 @@ if(strlen($start_date_parm) > 0){
 );
 $result = civicrm_api('CustomGroup', 'getsingle', $params);
 
+   if(isset($result['table_name'] )){
 	$pledge_extra_info = $result['table_name']; 
+   	}else{
+   		$pledge_extra_info = "";
+   	}
         
        $params = array(
   'version' => 3,
@@ -336,7 +351,11 @@ $result = civicrm_api('CustomGroup', 'getsingle', $params);
 );
 $result = civicrm_api('CustomField', 'getsingle', $params);
 
+ if(isset($result['column_name'])){
 	$pledge_source_field = $result['column_name'];
+ }else{
+ 	$pledge_source_field = "";
+ }
     if( strlen($pledge_source_field)  > 0 && strlen($pledge_extra_info) > 0 ){
     	
     	
