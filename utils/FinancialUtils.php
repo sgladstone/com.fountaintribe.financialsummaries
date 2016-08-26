@@ -860,10 +860,22 @@ and p.is_test = 0
 		 */
 		//print_r( $include_cols) ;
 		//print "<br>Inside process obligation: ".$ct_prefix_id;
+		
+		// This section is to avoid PHP 'undefined variable' warnings.
 		$contrib_type_total_due = "";
 		$contrib_type_total_tax_amount = "";
 		$tmp_due_date = "";
 
+		
+		$cur_cid_html = "";
+		$sub_total = 0;
+		$sub_received_total = 0;
+		$sub_adjustments_total = 0 ;
+		$sub_balance_total = 0;
+		$sub_due_total =0 ;
+		$sub_tax_amount_total = 0;
+		// end of section to avoid warnings. 
+		
 		if( count($contactIDs) == 0 ){
 			// no contacts, nothing to do.
 			return;
@@ -1671,6 +1683,7 @@ and p.is_test = 0
 		$tmp_sub_total = '$ '.number_format($sub_total, 2);
 		$tmp_obligation_sub_total[$prev_cid] = $sub_total;
 
+		
 		$tmp_received_sub_total[$prev_cid] = $sub_received_total;
 		$tmp_adjustments_sub_total[$prev_cid] = $sub_adjustments_total;
 		$tmp_balance_sub_total[$prev_cid] = $sub_balance_total;
@@ -1701,7 +1714,7 @@ and p.is_test = 0
 
 			$num_contacts_with_data =0;
 			foreach($rel_ids as $rel_cid){
-				if( strlen( $tmp_obligation_detail_rows[$rel_cid] ) > 0 ){
+				if( isset( $tmp_obligation_detail_rows[$rel_cid]) && strlen( $tmp_obligation_detail_rows[$rel_cid] ) > 0 ){
 					$num_contacts_with_data = $num_contacts_with_data + 1;
 				}
 			}
@@ -1727,15 +1740,35 @@ and p.is_test = 0
 						}
 					}
 				}
-				$tmp_html = $tmp_html.$tmp_obligation_detail_rows[$rel_cid];
-				 
-				$tmp_sub_amount = $tmp_sub_amount + $tmp_obligation_sub_total[$rel_cid];
-				$tmp_sub_received = $tmp_sub_received + $tmp_received_sub_total[$rel_cid] ;
-				$tmp_sub_adjustments = $tmp_sub_adjustments + $tmp_adjustments_sub_total[$rel_cid]  ;
-				$tmp_sub_balance = $tmp_sub_balance + $tmp_balance_sub_total[$rel_cid]  ;
-				$tmp_sub_due = $tmp_sub_due + $tmp_due_sub_total[$rel_cid]  ;
-				$tmp_sub_tax_amount = $tmp_sub_tax_amount + $tmp_tax_amount_sub_total[$rel_cid]  ;
-				 
+				
+				if( isset( $tmp_obligation_detail_rows[$rel_cid] )){
+					$tmp_html = $tmp_html.$tmp_obligation_detail_rows[$rel_cid];
+				}else{
+					
+				}
+				if(isset( $tmp_obligation_sub_total[$rel_cid] )){ 
+					$tmp_sub_amount = $tmp_sub_amount + $tmp_obligation_sub_total[$rel_cid];
+				}
+				
+				if(isset($tmp_received_sub_total[$rel_cid] )){
+					$tmp_sub_received = $tmp_sub_received + $tmp_received_sub_total[$rel_cid] ;
+				}
+				
+				if(isset($tmp_adjustments_sub_total[$rel_cid])){
+					$tmp_sub_adjustments = $tmp_sub_adjustments + $tmp_adjustments_sub_total[$rel_cid]  ;
+				}
+				
+				if(isset($tmp_balance_sub_total[$rel_cid] )){
+					$tmp_sub_balance = $tmp_sub_balance + $tmp_balance_sub_total[$rel_cid]  ;
+				}
+				
+				if(isset( $tmp_due_sub_total[$rel_cid] )){
+					$tmp_sub_due = $tmp_sub_due + $tmp_due_sub_total[$rel_cid]  ;
+				}
+				
+				if(isset( $tmp_tax_amount_sub_total[$rel_cid]  )){
+					$tmp_sub_tax_amount = $tmp_sub_tax_amount + $tmp_tax_amount_sub_total[$rel_cid]  ;
+				}
 	   // print "<br>Rel id tax amount: ".$rel_cid.": ".$tmp_sub_tax_amount;
 			}
 			 
