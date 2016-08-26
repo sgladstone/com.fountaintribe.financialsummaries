@@ -18,8 +18,11 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	// $this->_eventID = CRM_Utils_Array::value( 'event_id',
   	//                                           $this->_formValues );
   
-  
-  	$tmp_option_value_raw =   $this->_formValues['priceset_option_id'] ;
+    if(isset( $this->_formValues['priceset_option_id'] )){
+  		$tmp_option_value_raw =   $this->_formValues['priceset_option_id'] ;
+    }else{
+    	$tmp_option_value_raw = "";
+    }
   	//$form_values = split('_' , $tmp_option_value_raw );
   
   	$this->_userChoices = $tmp_option_value_raw;
@@ -340,8 +343,11 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   }
   
   function setColumns( ) {
-  	$layout_choice = $this->_formValues['layout_choice'] ;
-  	 
+  	if( isset($this->_formValues['layout_choice'])){
+	  	$layout_choice = $this->_formValues['layout_choice'] ;
+  	}else{
+  		$layout_choice = "";
+  	}
   	//print "<br><br>layout choice: ".$layout_choice;
   	if( $layout_choice == 'summarize_contact_contribution_type'){
   
@@ -377,9 +383,8 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	if($layout_choice == 'summarize_contact' || $layout_choice == 'summarize_household' ){
   
   
-  		$this->_columns = array( ts('' )    		=> 'contact_image',
+  		$this->_columns = array( 
   				ts('Name') 		=> 'sort_name',
-  
   				ts('Currency')		=> 'currency',
   				ts('Amount') 	=> 'total_amount',
   				ts('Received') 	=> 'received',
@@ -407,7 +412,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   
   
   		if((strlen($groupby) > 0 && $display_contact_name) ||   $layout_choice == 'summarize_household_contribution_type' ){
-  			$this->_columns = array( ts('' )    		=> 'contact_image',
+  			$this->_columns = array( 
   					ts('Name') 		=> 'sort_name',
   					ts($financial_type_label )  => 'contrib_type',
   					ts('Accounting Code') => 'accounting_code',
@@ -429,8 +434,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   
   
   		}else if(strlen($groupby) > 0 && !($display_contact_name) && ($display_contrib_type) ){
-  			$this->_columns = array( ts('' )    		=> 'contact_image',
-  
+  			$this->_columns = array( 
   					ts($financial_type_label )  => 'contrib_type',
   					ts('Accounting Code') => 'accounting_code',
   					ts('Financial Category') => 'financial_category',
@@ -444,9 +448,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   			);
   
   		}else if(strlen($groupby) > 0 && !($display_contact_name) && !($display_contrib_type) ){
-  			$this->_columns = array( ts('' )    		=> 'contact_image',
-  
-  					 
+  			$this->_columns = array( 
   					ts('Accounting Code') => 'accounting_code',
   					ts('Currency')		=> 'currency',
   					ts('Amount') 	=> 'total_amount',
@@ -457,7 +459,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   
   			);
   		}else{
-  			$this->_columns = array( ts('' )    		=> 'contact_image',
+  			$this->_columns = array( 
   					ts('Name') 		=> 'sort_name',
   					ts($financial_type_label )  => 'contrib_type',
   					ts('Accounting Code') => 'accounting_code',
@@ -527,6 +529,8 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   			 
   			 
   			$groupby = "";
+  			$tmp_email_join = ""; 
+  			
   			$layout_choice = $this->_formValues['layout_choice'] ;
   			if ( $onlyIDs ) {
   				$groupby = "";
@@ -586,7 +590,11 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   			$start_date_parm  = CRM_Utils_Date::processDate( $this->_formValues['start_date'] );
   			$end_date_parm  = CRM_Utils_Date::processDate( $this->_formValues['end_date'] );
   			 
-  			$financaial_set_id  = $this->_formValues['financial_set'] ;
+  			if( isset($this->_formValues['financial_set'])){
+  				$financaial_set_id  = $this->_formValues['financial_set'] ;
+  			}else{
+  				$financaial_set_id = "";
+  			}
   			 
   			 
   			 
@@ -912,7 +920,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	// return 50;
   }
    
-  function contactIDs( $offset = 0, $rowcount = 0, $sort = null) {
+  function contactIDs( $offset = 0, $rowcount = 0, $sort = null, $returnSQL = false) {
   	return $this->all( $offset, $rowcount, $sort, false, true );
   }
    
@@ -961,8 +969,11 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	$start_date_parm  = CRM_Utils_Date::processDate( $this->_formValues['start_date'] );
   	$end_date_parm  = CRM_Utils_Date::processDate( $this->_formValues['end_date'] );
   	 
-  	$financaial_set_id  = $this->_formValues['financial_set'] ;
-  	 
+  	if(isset( $this->_formValues['financial_set'])){
+  		$financaial_set_id  = $this->_formValues['financial_set'] ;
+  	}else{
+  		$financaial_set_id  = "";
+  	}
   	 
   	 
   	if(strlen($financaial_set_id) > 0 ){

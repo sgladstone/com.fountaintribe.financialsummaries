@@ -166,7 +166,9 @@ if(isset(  $outCustomColumnNames[$custom_field_original_date_label] )){
        		 $extra_where_clause = "WHERE ".$tmp_str; 
        		// print "<br><br>extra where clause: ".$extra_where_clause;
        
-       		}
+       	}else{
+       		$extra_where_clause = "";
+       	}
 		
 
 if( strlen($order_by_parm) == 0){
@@ -317,6 +319,8 @@ if(strlen($start_date_parm) > 0){
 	    
 	    $tmp_exclude_prepays_sql = $tmpPrepayment->getExcludePrepaymentsSQL();
     
+    }else{
+    	$tmp_exclude_prepays_sql = "";
     }
     
     

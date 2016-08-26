@@ -11,6 +11,7 @@ function get_contact_ids_for_sql($contactIDs){
 	$comma = ",";
 	 $i = 1;
 	
+	 if(is_array($contactIDs)){
         foreach ( $contactIDs as $cid ) {
           //$cid_list = $cid_list.$cid;
           $rel_ids = self::get_all_permissioned_ids($cid);
@@ -31,6 +32,9 @@ function get_contact_ids_for_sql($contactIDs){
           $i = $i + 1;
          
         }
+	 }else{
+	 	$cid_list = "";
+	 }
         
         //if(substr_compare($cis_list, $comma, -strlen($comma), strlen($comma)) === 0;
         

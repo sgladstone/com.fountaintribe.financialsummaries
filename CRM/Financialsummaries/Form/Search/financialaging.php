@@ -14,8 +14,11 @@ class CRM_Financialsummaries_Form_Search_financialaging extends CRM_Contact_Form
        // $this->_eventID = CRM_Utils_Array::value( 'event_id',
        //                                           $this->_formValues );
 	
-	
-	$tmp_option_value_raw =   $this->_formValues['priceset_option_id'] ; 
+	if(isset( $this->_formValues['priceset_option_id'] )){
+		$tmp_option_value_raw =   $this->_formValues['priceset_option_id'] ; 
+	}else{
+		$tmp_option_value_raw = "";
+	}
 	//$form_values = split('_' , $tmp_option_value_raw );
 	
 	$this->_userChoices = $tmp_option_value_raw; 
@@ -335,12 +338,14 @@ $group_ids = array();
  	$fin_type_label  = "Financial Type"; 
  
  
-    
+    if(isset($this->_formValues['layout_choice'])){
     	$layout_choice = $this->_formValues['layout_choice'] ;
+    }else{
+    	$layout_choice = "";
+    }
     	
         if(  $layout_choice == 'summarize_contribution_type'  ){
-        	$columns_to_show = array( ts('' )    		=> 'contact_image', 
-        			
+        	$columns_to_show = array(        			
         			ts('0-30 Days')	=> 'days_30',
                                  ts('31-60 Days')  => 'days_60',
                                  ts('61-90 Days')  => 'days_90',
@@ -361,7 +366,7 @@ $group_ids = array();
         
         }else if($layout_choice == 'summarize_contact' || $layout_choice == 'summarize_household' ){
          	
-        	$columns_to_show = array( ts('' )    		=> 'contact_image', 
+        	$columns_to_show = array(
         			ts('Name') 		=> 'sort_name', 
         			ts('0-30 Days')	=> 'days_30',
                                  ts('31-60 Days')  => 'days_60',
@@ -381,8 +386,7 @@ $group_ids = array();
         
         
         }else if($layout_choice == 'summarize_accounting_code'){
-        	$columns_to_show = array( ts('' )    		=> 'contact_image', 
-        			
+        	$columns_to_show = array( 
         			ts('0-30 Days')	=> 'days_30',
                                  ts('31-60 Days')  => 'days_60',
                                  ts('61-90 Days')  => 'days_90',
@@ -402,7 +406,7 @@ $group_ids = array();
         }else{
     
     
-        	$columns_to_show = array( ts('' )    		=> 'contact_image', 
+        	$columns_to_show = array(
         			ts('Name') 		=> 'sort_name', 
         			ts('0-30 Days')	=> 'days_30',
                                  ts('31-60 Days')  => 'days_60',
@@ -485,19 +489,11 @@ $group_ids = array();
     	$tmp_91_days = "if(   (datediff( date($base_date) ,date(expected_date)) > 90)  , total_amount,  NULL)";
     	
     	 
-/*
+
     	require_once('utils/FinancialCategory.php');
     	$tmpFinancialCategory = new FinancialCategory();
     	$financial_category_field_sql = $tmpFinancialCategory->getFinancialCategoryFieldAsSQL();
-*/    	
-
-	
-	
-	
-	
-	
-    	
-    		
+    
         if ( $onlyIDs ) {
         	$select  = "contact_a.id as contact_id, contact_a.id as id ";
     	}else{
@@ -743,6 +739,8 @@ CRM_Core_Error::debug_var('Aging sql:', $sql);
   	
   	if(strlen( $comm_prefs = $this->_formValues['comm_prefs']) > 0  ){
   		$tmp_email_join = "LEFT JOIN civicrm_email ON t1.underlying_contact_id = civicrm_email.contact_id AND civicrm_email.is_primary = 1 "; 
+  	}else{
+  		$tmp_email_join = "";
   	}
   	
   	
@@ -1114,7 +1112,7 @@ CRM_Core_Error::debug_var('Aging sql:', $sql);
            return $dao->N;
     }
        
-    function contactIDs( $offset = 0, $rowcount = 0, $sort = null) { 
+    function contactIDs( $offset = 0, $rowcount = 0, $sort = null,  $returnSQL = false) { 
         return $this->all( $offset, $rowcount, $sort, false, true );
     }
        

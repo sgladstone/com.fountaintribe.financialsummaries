@@ -22,12 +22,13 @@ class CRM_Financialsummaries_Form_Search_engagementsummary extends CRM_Contact_F
        
        }
        
-        //require_once('utils/Entitlement.php');
-        //$entitlement = new Entitlement();
-        
-        //$config_style = $entitlement->getConfigurationStyle();
+     
 
+       if(isset($this->_formValues['layout_choice'])){
          $layout_choice =  $this->_formValues['layout_choice'];  
+       }else{
+       	$layout_choice = "";
+       }
          if($layout_choice == 'detail'){
          $tmp_columns_to_show = array( 
                                  ts('Name')       => 'sort_name',
@@ -93,7 +94,11 @@ class CRM_Financialsummaries_Form_Search_engagementsummary extends CRM_Contact_F
 // print "<br><br>Inside init"; 
                 $ft_names = $this->getFinancialTypeLabels(  $financial_type );
 
-                 $contrib_year = $this->_formValues['contrib_year']; 
+                if(isset($this->_formValues['contrib_year'])){
+                 	$contrib_year = $this->_formValues['contrib_year']; 
+                }else{
+                	$contrib_year = array();
+                }
                    if(count($contrib_year) == 0){
                       $contrib_years_to_show = array( 'all' ) ;
                    }else{
@@ -150,10 +155,8 @@ class CRM_Financialsummaries_Form_Search_engagementsummary extends CRM_Contact_F
          */
         $this->setTitle('Engagement Summary');
         
-     //   require_once('utils/Entitlement.php');
-     //   $entitlement = new Entitlement();
-        
-     //   $config_style = $entitlement->getConfigurationStyle();
+    
+        $config_style = "";
            
         /**
          * Define the search form fields here
@@ -233,8 +236,8 @@ $config = CRM_Core_Config::singleton( );
    $tmp_fiscal_config=  $config->fiscalYearStart;
   
   
-  $fyDate = $tmp_fiscal_config[d];
-  $fyMonth = $tmp_fiscal_config[M]; 
+  $fyDate = $tmp_fiscal_config['d'];
+  $fyMonth = $tmp_fiscal_config['M']; 
   $month_name =  date("F", mktime(0, 0, 0, $fyMonth, 10));;
   $formatted_fisc = $month_name." ".$fyDate; 
          $all_contrib_years = $this->getListContribYears() ;
@@ -399,16 +402,20 @@ $config = CRM_Core_Config::singleton( );
     //              $includeContactIDs = FALSE, $onlyIDs = FALSE ) {
     
     
-     //require_once('utils/Entitlement.php');
-     //   $entitlement = new Entitlement();
-        
-     //   $config_style = $entitlement->getConfigurationStyle();
+    
+             $config_style = "";
+             $total_where = "";
                         
          $layout_choice =  $this->_formValues['layout_choice'];  
 
          $region_column = $this->getRegionAsColumn( );
 
-         $giving_level_choice =  $this->_formValues['giving_level'];
+         if(isset($this->_formValues['giving_level'] )){
+         	$giving_level_choice =  $this->_formValues['giving_level'];
+         }else{
+         	$giving_level_choice = "";
+         }
+         
          $contrib_year =  $this->_formValues['contrib_year'];
 
          if( count($contrib_year)  == 1){
@@ -665,11 +672,9 @@ $config = CRM_Core_Config::singleton( );
     function from( ) {
 
      // TODO: IF this is an alumni association, add SQL for alumni-specific tables such as class year 
-	// require_once('utils/Entitlement.php');
-       // $entitlement = new Entitlement();
-        
-       // $config_style = $entitlement->getConfigurationStyle();
-
+    	$config_style = "";
+    	$cur = "";
+    	$tmp_giving_level = ""; 
        $contrib_year = $this->_formValues['contrib_year']; 
        $year_list = implode( ", " , $contrib_year);
        
@@ -784,7 +789,8 @@ $config = CRM_Core_Config::singleton( );
 		
 		}
 			
-              foreach(  $contrib_years_to_show as $cur_contrib_year ){     
+              foreach(  $contrib_years_to_show as $cur_contrib_year ){   
+              	$tmp_join = "";
                   foreach( $financial_cols_array as $cur){
 
                        if( $financial_cols == 'show_financial_types' ){
@@ -958,7 +964,12 @@ $config = CRM_Core_Config::singleton( );
 	}
 	
 	function getFinancialTypeChoicesFromUser(){
-	    $tmp =  $this->_formValues['pog_financial_type'];
+		
+		if(isset($this->_formValues['pog_financial_type'])){
+	    	$tmp =  $this->_formValues['pog_financial_type'];
+		}else{
+			$tmp = array();
+		}
 	    if( count( $tmp) == 0){
                // If the user didn't choose any financial types, then get everything. 
                $tmp = $this->getListFinancialTypes();
@@ -970,7 +981,11 @@ $config = CRM_Core_Config::singleton( );
 
 
        function getFinancialSetChoicesFromUser(){
-	    $tmp =  $this->_formValues['financial_set'];
+       	if(isset($this->_formValues['financial_set'])){
+	    	$tmp =  $this->_formValues['financial_set'];
+       	}else{
+       		$tmp = array();
+       	}
 	    if( count( $tmp) == 0){
                // If the user didn't choose any financial sets, then get everything. 
                $tmp = $this->getListFinancialSets();
@@ -987,10 +1002,7 @@ $config = CRM_Core_Config::singleton( );
      */
     function where( $includeContactIDs = false , $primary_outer_where = false ) {
       
-    //  require_once('utils/Entitlement.php');
-    //    $entitlement = new Entitlement();
-        
-    //    $config_style = $entitlement->getConfigurationStyle();
+ 
       
         $clauses = array( );
 
@@ -1028,8 +1040,11 @@ $config = CRM_Core_Config::singleton( );
         
         // primary address region
        // $mha_region = CRM_Utils_Array::value( 'mha_region', $this->_formValues );
-        
-         $mha_region  =  $this->_formValues['mha_region']; 
+        if(isset($this->_formValues['mha_region'])){
+         	$mha_region  =  $this->_formValues['mha_region']; 
+        }else{
+        	$mha_region = array();
+        }
         if( count($mha_region) > 0  ) {
                     $tmp_regions_str = implode(" , ", $mha_region); 
                     $tmp_region_field = $this->getRegionAsColumn( );
@@ -1038,9 +1053,12 @@ $config = CRM_Core_Config::singleton( );
             
         }
 
-         // Filter on MHA class  year if needed. 
-        
-         $class_year  =  $this->_formValues['class_year']; 
+         // Filter on university class year if needed. 
+        if( isset($this->_formValues['class_year'])){
+         	$class_year  =  $this->_formValues['class_year']; 
+        }else{
+        	$class_year  = array();
+        }
          if( count($class_year) > 0  ) {
              $years_list = implode( ", " , $class_year);
              $clauses[] = " ( programinfo.class_of__mha__44 IN (".$years_list.") ) ";
@@ -1085,8 +1103,11 @@ $config = CRM_Core_Config::singleton( );
 
           // filter on giving levels, only valid if the user selected a single year.
        $contrib_year = $this->_formValues['contrib_year']; 
-       $giving_level = $this->_formValues['giving_level']; 
-
+       if(isset($this->_formValues['giving_level'])){
+  	     $giving_level = $this->_formValues['giving_level']; 
+       }else{
+       	$giving_level = array();
+       }
         
        if(  count($contrib_year) <> 1  && count($giving_level ) > 0) {
 
@@ -1547,7 +1568,7 @@ function getListFinancialSets($for_user_filter = FALSE){
         return $dao->N;
     }
         
-     function contactIDs( $offset = 0, $rowcount = 0, $sort = null) { 
+     function contactIDs( $offset = 0, $rowcount = 0, $sort = null, $returnSQL = false) { 
         return $this->all( $offset, $rowcount, $sort, false, true );
     }
         
