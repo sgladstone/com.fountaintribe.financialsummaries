@@ -3,9 +3,10 @@
  <table border=0 cellspacing=0 cellpadding=0 style="border: 0;"><tr><td>
  
 
-<a href='/civicrm/contact/view/contribution?reset=1&action=add&context=contribution&cid={$cid}' class='button'><span><div class="icon add-icon"></div>New Contribution</span></a>
- <a href='/civicrm/contact/view/pledge?reset=1&action=add&context=pledge&cid={$cid}' class='button'><span><div class="icon add-icon"></div>New Pledge</span></a>{if $can_post_back_office_credit_card eq true }&nbsp;&nbsp;
- <a href='/civicrm/contact/view/contribution?reset=1&action=add&cid={$cid}&context=contribution&mode=live' class='button'><span><div class="icon add-icon"></div>New Automated Credit Card Contribution(s)</span></a>
+
+<a href='/civicrm/contact/view/contribution?reset=1&action=add&context=contribution&cid={$cid}' class='button'><span><i class="crm-i fa-plus-circle"> </i>New Contribution</span></a>
+ <a href='/civicrm/contact/view/pledge?reset=1&action=add&context=pledge&cid={$cid}' class='button'><span><i class="crm-i fa-plus-circle"> </i>New Pledge</span></a>{if $can_post_back_office_credit_card eq true }&nbsp;&nbsp;
+ <a href='/civicrm/contact/view/contribution?reset=1&action=add&cid={$cid}&context=contribution&mode=live' class='button'><span><i class="crm-i fa-plus-circle"> </i>New Automated Credit Card Contribution(s)</span></a>
   {/if} 
   </td></tr>
   
