@@ -15,7 +15,12 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		//                                           $this->_formValues );
 	
 	
-		$tmp_option_value_raw =   $this->_formValues['priceset_option_id'] ;
+		if(isset( $this->_formValues['priceset_option_id'])){
+			$tmp_option_value_raw =   $this->_formValues['priceset_option_id'] ;
+		}else{
+			$tmp_option_value_raw = "";
+			
+		}
 		//$form_values = split('_' , $tmp_option_value_raw );
 	
 		$this->_userChoices = $tmp_option_value_raw;
@@ -225,7 +230,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 	
 	
 	
-		$this->_columns = array( ts('' )    		=> 'contact_image',
+		$this->_columns = array( 
 				ts('Name') 		=> 'sort_name',
 				ts('Phone') 		=> 'phone',
 				ts('Email')		=> 'email',
@@ -437,8 +442,13 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		}
 	
 		 
-		if(strlen( $comm_prefs = $this->_formValues['comm_prefs']) > 0  ){
+		if(isset(  $this->_formValues['comm_prefs'] )  && strlen(  $this->_formValues['comm_prefs']) > 0  ){
+			$comm_prefs = $this->_formValues['comm_prefs'];
 			$tmp_email_join = "LEFT JOIN civicrm_email ON contact_a.id = civicrm_email.contact_id AND civicrm_email.is_primary = 1 ";
+		}else{
+			$comm_prefs = "";
+			$tmp_email_join = "";
+			
 		}
 		$tmp_from = " civicrm_contact contact_a
 		$tmp_from_sql
@@ -454,11 +464,22 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		$clauses[] = "contact_a.is_deleted <> 1";
 		$clauses[] = "contact_a.is_deceased <> 1";
 	
-		$oc_month_start = $this->_formValues['oc_month_start'] ;
-		$oc_month_end = $this->_formValues['oc_month_end'] ;
-	
-		$oc_day_start = $this->_formValues['oc_day_start'];
-		$oc_day_end = $this->_formValues['oc_day_end'];
+		if(isset($this->_formValues['oc_month_start'] )){
+			$oc_month_start = $this->_formValues['oc_month_start'] ;
+		}
+		
+		if( isset(  $this->_formValues['oc_month_end'] )){
+			$oc_month_end = $this->_formValues['oc_month_end'] ;
+		}
+		
+		if(isset( $this->_formValues['oc_day_start'] )){
+			$oc_day_start = $this->_formValues['oc_day_start'];
+		}
+		
+		if( isset(  $this->_formValues['oc_day_end'])){
+			$oc_day_end = $this->_formValues['oc_day_end'];
+		}
+		
 	
 	
 		$groups_of_individual = $this->_formValues['group_of_contact'];
@@ -467,8 +488,11 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		$searchTools = new CustomSearchTools();
 	
 	
-		$comm_prefs = $this->_formValues['comm_prefs'];
-	
+		if( isset($this->_formValues['comm_prefs'] )){
+			$comm_prefs = $this->_formValues['comm_prefs'];
+		}else{
+			$comm_prefs = "";
+		}
 		$searchTools->updateWhereClauseForCommPrefs($comm_prefs, $clauses ) ;
 	
 		$tmp_sql_list = $searchTools->getSQLStringFromArray($groups_of_individual);
@@ -504,7 +528,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		}
 	
 	
-		if ( $includeContactIDs ) {
+		if ( isset( $includeContactIDs ) && $includeContactIDs ) {
 			$contactIDs = array( );
 			foreach ( $this->_formValues as $id => $value ) {
 				if ( $value &&
@@ -829,7 +853,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		return $dao->N;
 	}
 	 
-	function contactIDs( $offset = 0, $rowcount = 0, $sort = null) {
+	function contactIDs( $offset = 0, $rowcount = 0, $sort = null, $returnSQL = false) {
 		return $this->all( $offset, $rowcount, $sort, false, true );
 	}
 	 

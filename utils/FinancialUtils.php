@@ -1055,7 +1055,7 @@ and p.is_test = 0
 
 		$html_table_end = ' </table>  	 ';
 
-
+  
 
 		$tmp_order_by = "contact_id, rec_date";
 		if( $need_subtotals){
