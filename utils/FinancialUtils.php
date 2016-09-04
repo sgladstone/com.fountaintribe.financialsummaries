@@ -1141,9 +1141,9 @@ and p.is_test = 0
 		   $fmt_contrib_type_total_received = $currency_symbol.number_format($contrib_type_total_received, 2);
 		   $fmt_contrib_type_total_adjusted = $currency_symbol.number_format($contrib_type_total_adjusted, 2);
 		   $fmt_contrib_type_total_balance = $currency_symbol.number_format($contrib_type_total_balance, 2);
-		   $fmt_contrib_type_total_due = $currency_symbol.number_format($contrib_type_total_due, 2);
+		   $fmt_contrib_type_total_due = $currency_symbol.number_format( floatval($contrib_type_total_due) , 2);
 		    
-		   $fmt_contrib_type_total_tax_amount = $currency_symbol.number_format($contrib_type_total_tax_amount, 2);
+		   $fmt_contrib_type_total_tax_amount = $currency_symbol.number_format( floatval($contrib_type_total_tax_amount), 2);
 		    
 		   $tmp_sub_cid = $cur_cid;
 		   if($cur_cid != $prev_cid){
@@ -1202,7 +1202,9 @@ and p.is_test = 0
 		   $tmp_row = $tmp_row."</tr><tr><td colspan=$tmp_total_col_count>&nbsp;</td></tr>";
 
 		   //print "\n<br><br> ".$tmp_row;
-		   $tmp_obligation_detail_rows[$tmp_sub_cid] =  $tmp_obligation_detail_rows[$tmp_sub_cid].$tmp_row;
+		   if(isset( $tmp_obligation_detail_rows[$tmp_sub_cid])){
+		   		$tmp_obligation_detail_rows[$tmp_sub_cid] =  $tmp_obligation_detail_rows[$tmp_sub_cid].$tmp_row;
+		   }		
 
 		 	 $contrib_type_total_charged =  0;
 		 	 $contrib_type_total_received = 0 ;

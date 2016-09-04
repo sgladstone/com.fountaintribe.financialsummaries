@@ -55,7 +55,8 @@ class CustomSearchTools{
 	
 	function updateWhereClauseForMemberships( &$mem_types_of_contact,  &$mem_orgs_of_contact, &$contact_field_name,  &$clauses   ){
 		// deal with membership filters. 
-		 $tmp_membership_sql_list = self::convertArrayToSqlString( $mem_types_of_contact  ) ; 
+	//	 $tmp_membership_sql_list = self::convertArrayToSqlString( $mem_types_of_contact  ) ; 
+		$tmp_membership_sql_list = implode( ",", $mem_types_of_contact ); 
 		if(strlen($tmp_membership_sql_list) > 0 ){
 			$clauses[] =   "(  ( ".$contact_field_name." IN ( SELECT mem.contact_id
 								 FROM civicrm_membership mem 
@@ -67,7 +68,8 @@ class CustomSearchTools{
 		
 		} 
 	
-		$tmp_membership_org_sql_list = self::convertArrayToSqlString( $mem_orgs_of_contact  ) ; 
+		//$tmp_membership_org_sql_list = self::convertArrayToSqlString( $mem_orgs_of_contact  ) ; 
+		$tmp_membership_org_sql_list = implode( ",", $mem_orgs_of_contact  );
 		if(strlen($tmp_membership_org_sql_list) > 0 ){
 			 $clauses[] =   "(  ( ".$contact_field_name." IN (  SELECT mem.contact_id
 								 FROM civicrm_membership mem 

@@ -36,7 +36,12 @@ class FormattingUtils{
 		}else{
 			$date_range_tmp_array   = explode("_", $date_range);
 			$start_date = $date_range_tmp_array[0];
-			$end_date = $date_range_tmp_array[1];
+			
+			if( isset( $date_range_tmp_array[1])){
+				$end_date = $date_range_tmp_array[1];
+			}else{
+				$end_date = "";
+			}
 			 
 		}
 		 

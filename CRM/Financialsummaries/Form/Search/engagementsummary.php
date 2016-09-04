@@ -154,6 +154,14 @@ class CRM_Financialsummaries_Form_Search_engagementsummary extends CRM_Contact_F
         
     
         $config_style = "";
+        
+        $select2style = array(
+        		'multiple' => TRUE,
+        		'style' => 'width:100%; max-width: 100em;',
+        		'class' => 'crm-select2',
+        		'placeholder' => ts('- select -'),
+        );
+         
            
         /**
          * Define the search form fields here
@@ -196,10 +204,15 @@ class CRM_Financialsummaries_Form_Search_engagementsummary extends CRM_Contact_F
         // filter for groups. 
         $group_ids =  CRM_Core_PseudoConstant::nestedGroup();
         
-             $form->add('select', 'group_of_contact', ts('Contact in Group(s)'), $group_ids, FALSE,
-          array('id' => 'group_of_contact', 'multiple' => 'multiple', 'title' => ts('-- any --'))
-        );
+
+        $form->add('select', 'group_of_contact',
+        		ts('Contact is in the group(s)'),
+        		$group_ids,
+        		FALSE,
+        		$select2style
+        		);
         
+          
         
   	  // filter for tags. 
           //$tag_ids =   CRM_Core_PseudoConstant::tag();  
@@ -216,9 +229,22 @@ $result = civicrm_api('Tag', 'get', $params);
      
      }
      
+     
+
+     $form->add('select', 'tag_of_contact',
+     		ts('Contact has Tag(s)'),
+     		$tag_ids,
+     		FALSE,
+     		$select2style
+     		);
+     
+     
+     /*
              $form->add('select', 'tag_of_contact', ts('Contact has Tag(s)'), $tag_ids, FALSE,
           array('id' => 'tag_of_contact', 'multiple' => 'multiple', 'title' => ts('-- any --'))
         );
+        
+        */
         
        
         if( $config_style == "Alumni Membership Organization"){
@@ -239,15 +265,36 @@ $config = CRM_Core_Config::singleton( );
   $month_name =  date("F", mktime(0, 0, 0, $fyMonth, 10));;
   $formatted_fisc = $month_name." ".$fyDate; 
          $all_contrib_years = $this->getListContribYears() ;
+         
+         
+         $form->add('select', 'contrib_year',
+         		ts('Contribution Fiscal Year(s) (starts '.$formatted_fisc.')'),
+         		$all_contrib_years,
+         		FALSE,
+         		$select2style
+         		);
+         
+         /*
        $form->add('select', 'contrib_year', ts('Contribution Fiscal Year(s) (starts '.$formatted_fisc.')'), $all_contrib_years, FALSE,
           array('id' => 'contrib_year', 'multiple' => 'multiple', 'title' => ts('-- any --'))
-        );     
+        );   
+        */  
 
        $event_list = $this->getEventsWithParticipants(); 
-       $form->add('select', 'event_choice', ts('Event(s)'), $event_list, FALSE,
+       
+
+       $form->add('select', 'event_choice',
+       		ts('Event(s)'),
+       		$event_list,
+       		FALSE,
+       		$select2style
+       		);
+       
+       /*
+        $form->add('select', 'event_choice', ts('Event(s)'), $event_list, FALSE,
           array('id' => 'event_choice', 'multiple' => 'multiple', 'title' => ts('-- any --'))
         );  
-        
+        */
 
 
       $rel_set_choices = $this->getListRelationshipSets( $for_user_filter );
@@ -255,9 +302,18 @@ $config = CRM_Core_Config::singleton( );
       	$rel_set_choices[] = "No Relationship Sets Found"; 
       
       }
+      
+      $form->add('select', 'relationship_sts',
+      		ts('Relationship Set(s)'),
+      		$rel_set_choices,
+      		FALSE,
+      		$select2style
+      		);
+      /*
        $form->add('select', 'relationship_sts', ts('Relationship Set(s)'), $rel_set_choices, FALSE,
           array('id' => 'relationship_sts', 'multiple' => 'multiple', 'title' => ts('-- any --'))
-        ); 
+        );
+        */ 
 
 
 	if( $config_style == "Alumni Membership Organization"){
@@ -278,14 +334,35 @@ $config = CRM_Core_Config::singleton( );
         }
         
         $ft_choices = $this->getListFinancialTypes($for_user_filter);
+
+        $form->add('select', 'pog_financial_type',
+        		ts('Financial Type(s)'),
+        		$ft_choices,
+        		FALSE,
+        		$select2style
+        		);
+        
+        /*
         $form->add('select', 'pog_financial_type', ts('Financial Type(s)'), $ft_choices, FALSE,
           array('id' => 'pog_financial_type', 'multiple' => 'multiple', 'title' => ts('-- any --'))
         ); 
+        */
   
         $fs_choices = $this->getListFinancialSets($for_user_filter);
+        
+
+        $form->add('select', 'financial_set',
+        		ts('Financial Set(s)'),
+        		$fs_choices,
+        		FALSE,
+        		$select2style
+        		);
+        
+        /*
         $form->add('select', 'financial_set', ts('Financial Set(s)'), $fs_choices, FALSE,
           array('id' => 'financial_set', 'multiple' => 'multiple', 'title' => ts('-- any --'))
         );
+        */
 
        $f_column_choice = array();
     //   $f_column_choice[''] = ' -- select -- ';

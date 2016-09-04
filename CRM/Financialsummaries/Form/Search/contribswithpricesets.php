@@ -184,7 +184,13 @@ AND    p.entity_id    = e.id
   	 */
   	// 'lineitem_id'
   	// li_pricefieldID_valueID = 'valueID'
-  	 
+  	$select2style = array(
+  			'multiple' => TRUE,
+  			'style' => 'width:100%; max-width: 100em;',
+  			'class' => 'crm-select2',
+  			'placeholder' => ts('- select -'),
+  	);
+  	
   
   	 
   	$layout_options = array();
@@ -231,11 +237,21 @@ AND    p.entity_id    = e.id
   	}
   	$dao->free();
   
-  	 
+  	
+  	
+  	$form->add('select', 'price_set_ids',
+  			ts('Price Set(s)'),
+  			$all_price_sets,
+  			FALSE,
+  			$select2style
+  			);
+  	
+  	
+  	 /*
   	$form->add('select', 'price_set_ids', ts('Price Sets'), $all_price_sets, FALSE,
   			array('id' => 'price_set_ids', 'multiple' => 'multiple', 'title' => ts('-- select --'))
   			);
-  
+  */
   
   	// Create filter on price set field value ids
   	$all_price_set_values = array();
@@ -257,10 +273,18 @@ AND    p.entity_id    = e.id
   	}
   	$dao->free();
   
-  	 
+  	$form->add('select', 'price_value_ids',
+  			ts('Price Set Value(s)'),
+  			$all_price_set_values,
+  			FALSE,
+  			$select2style
+  			);
+  	
+  	/* 
   	$form->add('select', 'price_value_ids', ts('Price Set Values'), $all_price_set_values, FALSE,
   			array('id' => 'price_value_ids', 'multiple' => 'multiple', 'title' => ts('-- select --'))
   			);
+  			*/
   
   	/**
   	 * You can define a custom title for the search form

@@ -492,7 +492,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 	
 		$tmp_contact_sql = "rel.contact_id_b as household_id , ifnull( rel.contact_id_b, contact_a.id ) as contact_id, contact_a.id as underlying_contact_id  ";
 	
-	
+	// TODO: Look up relationship type IDs.
 		$tmp_rel_type_ids = "7, 6";   // Household member of , Head of Household
 		$tmp_from_sql = " LEFT JOIN civicrm_relationship rel ON contact_a.id = rel.contact_id_a AND rel.is_active = 1 AND rel.is_permission_b_a = 1 AND rel.relationship_type_id IN ( ".$tmp_rel_type_ids." ) ";
 	
@@ -579,7 +579,8 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		$membership_types_of_con = $this->_formValues['membership_type_of_contact'];
 	
 	
-		$tmp_membership_sql_list = $searchTools->convertArrayToSqlString( $membership_types_of_con ) ;
+		//$tmp_membership_sql_list = $searchTools->convertArrayToSqlString( $membership_types_of_con ) ;
+		$tmp_membership_sql_list = implode(",",   $membership_types_of_con) ;
 		if(strlen($tmp_membership_sql_list) > 0 ){
 			$clauses[] = "memberships.membership_type_id IN (".$tmp_membership_sql_list.")" ;
 			$clauses[] = "mem_status.is_current_member = '1'";
@@ -589,7 +590,8 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 	
 		// 'membership_org_of_contact'
 		$membership_org_of_con = $this->_formValues['membership_org_of_contact'];
-		$tmp_membership_org_sql_list = $searchTools->convertArrayToSqlString( $membership_org_of_con ) ;
+		//$tmp_membership_org_sql_list = $searchTools->convertArrayToSqlString( $membership_org_of_con ) ;
+		$tmp_membership_org_sql_list = implode( "," , $membership_org_of_con );
 		if(strlen($tmp_membership_org_sql_list) > 0 ){
 	
 			$clauses[] = "mt.member_of_contact_id IN (".$tmp_membership_org_sql_list.")" ;
