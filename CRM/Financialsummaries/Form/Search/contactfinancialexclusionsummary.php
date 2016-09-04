@@ -7,6 +7,8 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 
 	protected $_formValues;
 	protected $groupby_string ;
+	public $_permissionedComponent;
+	
 	
 	function __construct( &$formValues ) {
 		parent::__construct( $formValues );
@@ -44,9 +46,9 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		 
 	
 		$this->setColumns( );
-	
-	
-	
+		
+		// define component access permission needed
+		$this->_permissionedComponent = 'CiviContribute';
 	}
 	
 	function __destruct( ) {
@@ -74,39 +76,95 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		 * are part of the search criteria
 		 */
 		 
-		// TODO: Check if user is authorized
-		if (1 ==0 ){
-			$this->setTitle('Not Authorized');
-			return;
-			 
-		}
-	
 	
 	
 		/* Make sure user can filter on groups and memberships  */
-		require_once('utils/CustomSearchTools.php');
-		$searchTools = new CustomSearchTools();
-		//$group_ids = $searchTools->getRegularGroupsforSelectList();
-	
-		$group_ids =   CRM_Core_PseudoConstant::group();
+		
+		$group_ids =  CRM_Core_PseudoConstant::nestedGroup();
+		 
+		$cur_domain_id = "-1";
+		
+		$result = civicrm_api3('Domain', 'get', array(
+				'sequential' => 1,
+				'current_domain' => "",
+		));
+		
+		if( $result['is_error'] == 0 ){
+			$cur_domain_id = $result['id'];
+			 
+		}
+		// get membership ids and org contact ids.
+		$mem_ids = array();
+		$org_ids = array();
+		$api_result = civicrm_api3('MembershipType', 'get', array(
+				'sequential' => 1,
+				'is_active' => 1,
+				'domain_id' =>  $cur_domain_id ,
+				'options' => array('sort' => "name"),
+		));
+		
+		 
+		if( $api_result['is_error'] == 0 ){
+			$tmp_api_values = $api_result['values'];
+			foreach($tmp_api_values as $cur){
+				 
+				$tmp_id = $cur['id'];
+				$mem_ids[$tmp_id] = $cur['name'];
+		
+				$org_id = $cur['member_of_contact_id'];
+				// get display name of org
+				$result = civicrm_api3('Contact', 'getsingle', array(
+						'sequential' => 1,
+						'id' => $org_id ,
+				));
+				$org_ids[$org_id] = $result['display_name'];
+				 
+		
+			}
+			 
+		}
+		
+		
+		$select2style = array(
+				'multiple' => TRUE,
+				'style' => 'width:100%; max-width: 100em;',
+				'class' => 'crm-select2',
+				'placeholder' => ts('- select -'),
+		);
+		 
+		$form->add('select', 'group_of_contact',
+				ts('Contact is in the group(s)'),
+				$group_ids,
+				FALSE,
+				$select2style
+				);
+		 
+		$form->add('select', 'membership_type_of_contact',
+				ts('Contact has the membership of type(s)'),
+				$mem_ids,
+				FALSE,
+				$select2style);
+		
+		$form->add('select', 'membership_org_of_contact',
+				ts('Contact has Membership In'),
+				$org_ids,
+				FALSE,
+				$select2style);
+		 /*
 	
 		$form->add('select', 'group_of_contact', ts('Contact is in the group'), $group_ids, FALSE,
 				array('id' => 'group_of_contact', 'multiple' => 'multiple', 'title' => ts('-- select --'))
 				);
 	
-	
-		$mem_ids = $searchTools->getMembershipsforSelectList();
-	
-	
-	
 		$form->add('select', 'membership_type_of_contact', ts('Contact has the membership of type'), $mem_ids, FALSE,
 				array('id' => 'membership_type_of_contact', 'multiple' => 'multiple', 'title' => ts('-- select --'))
 				);
 	
-		$org_ids = $searchTools->getMembershipOrgsforSelectList();
+	
 		$form->add('select', 'membership_org_of_contact', ts('Contact has Membership In'), $org_ids, FALSE,
 				array('id' => 'membership_org_of_contact', 'multiple' => 'multiple', 'title' => ts('-- select --'))
 				);
+				*/
 		/* end of filters for groups and memberships  */
 	
 	
@@ -176,7 +234,20 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		$financial_type_label = "Financial Types";
 		$summary_type_label = "Financial Type";
 		
-		 
+		$form->add('select', 'contrib_type',
+				ts('Financial Type(s)'),
+				$contrib_type_choices,
+				FALSE,
+				$select2style
+				);
+		
+		$form->add('select', 'accounting_code',
+				ts('Accounting Code(s)'),
+				$accounting_code_choices,
+				FALSE,
+				$select2style
+				);
+		 /*
 		$form->add('select', 'contrib_type', ts($financial_type_label), $contrib_type_choices, FALSE,
 				array('id' => 'contrib_type', 'multiple' => 'multiple', 'title' => ts('-- select --'))
 				);
@@ -185,13 +256,15 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 		$form->add('select', 'accounting_code', ts('Accounting Codes'),  $accounting_code_choices, FALSE,
 				array('id' => 'accounting_code', 'multiple' => 'multiple', 'title' => ts('-- select --'))
 				);
+				
+				*/
 		 
 	
 		$balance_choices = array();
 		$balance_choices[''] = '  -- Select Balances to Exclude -- ';
-		$balance_choices['all'] = 'Exclude Any - open balance or close balance';
+		$balance_choices['all'] = 'Exclude Any - open balance or closed balance';
 		//   $balance_choices['open_balances'] = 'Exclude Those With Open Balances (Balance is not 0) (ie only list people with a closed balance, or no financial     // activity)' ;
-		$balance_choices['closed_balances'] = 'Exclude Those With Closed Balances (Balance is 0) (ie only list contacts with an open balance, or no finacial activity)';
+		$balance_choices['closed_balances'] = 'Exclude those With closed/zero balances';  //  (ie only list contacts with an open balance, or no finacial activity)
 	
 	
 		$form->add  ('select', 'balance_choice', ts('Exclude Based On Balance'),
@@ -265,15 +338,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 	 
 	function all( $offset = 0, $rowcount = 0, $sort = null,
 			$includeContactIDs = false, $onlyIDs = false ) {
-				 
-				// TODO: check authority of end-user to 'access CiviContribute'
-				
-				if (  1==0 ){
-					return "select contact_a.id as contact_id from civicrm_contact contact_a where 1=0 ";
-					 
-				}
-				 
-				 
+				  
 				 
 				// Force summarize by layout, for exlusion does not make sense otherwise
 	
@@ -354,12 +419,19 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 				}
 				$sql_inner = self::get_sql_contacts_to_include();
 	
-				// print "<br><br> inner sql: ".$sql_inner;
-				// $outer_group_by = " group by contact_a.id, contact_b.contrib_type" ;
 				 
-				// group by contact_a.id, contact_b.entity_type, contact_b.id  ";
-				 
-				 
+				
+				// Check if current user is restricted to certain contacts by ACLs.
+				$acl_sql_fragment  = CRM_Contact_BAO_Contact_Permission::cacheSubquery();
+				
+				$acl_where_clause = "";
+				if( strlen( $acl_sql_fragment ) > 0 ){
+					 $acl_where_clause = " AND contact_b.contact_id ".$acl_sql_fragment;	
+				}
+				
+				
+				
+				 // Now put the whole thing together.
 				$sql  = "SELECT ".$outer_select." FROM ($sql_inner
 				) as contact_b
 				LEFT JOIN civicrm_email email ON contact_b.contact_id = email.contact_id AND email.is_primary = 1
@@ -368,7 +440,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialexclusionsummary extend
 				LEFT JOIN civicrm_state_province state ON address.state_province_id = state.id
 				LEFT JOIN civicrm_country country ON address.country_id = country.id
 				LEFT JOIN civicrm_contact contact_a ON contact_b.contact_id = contact_a.id
-				WHERE contact_b.contact_id NOT IN ( ".$sql_inner_financials." )
+				WHERE contact_b.contact_id NOT IN ( ".$sql_inner_financials." ) ".$acl_where_clause. "
 	AND contact_a.contact_type = 'Household'
 	AND contact_a.is_deleted <> 1
 	GROUP BY contact_id ";

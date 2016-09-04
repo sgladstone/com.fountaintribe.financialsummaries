@@ -11,6 +11,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   protected $groupby_string ;
   protected $FINANCIAL_TYPE_IDS ;
   protected $GENERAL_LEDGER_CODES;
+  public $_permissionedComponent;
   
   function __construct( &$formValues ) {
   	parent::__construct( $formValues );
@@ -46,6 +47,8 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	 
   
   	$this->setColumns( );
+  	// define component access permission needed
+  	$this->_permissionedComponent = 'CiviContribute';
   
   
   
@@ -87,35 +90,30 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	
   	*/
   
-  	$group_ids = array();
   	
-  	$group_result = civicrm_api3('Group', 'get', array(
+  	$group_ids =  CRM_Core_PseudoConstant::nestedGroup();
+  	
+  	$cur_domain_id = "-1";
+  		
+  	$result = civicrm_api3('Domain', 'get', array(
   			'sequential' => 1,
-  			'is_active' => 1,
-  			'is_hidden' => 0,
-  			'options' => array('sort' => "title"),
+  			'current_domain' => "",
   	));
+  		
+  	if( $result['is_error'] == 0 ){
+  		$cur_domain_id = $result['id'];
   	
-  	if( $group_result['is_error'] == 0 ){
-  		$tmp_api_values = $group_result['values'];
-  		foreach($tmp_api_values as $cur){
-  			$grp_id = $cur['id'];
-  	
-  			$group_ids[$grp_id] = $cur['title'];
-  	
-  	
-  		}
   	}
-  	
-  	
   	// get membership ids and org contact ids.
   	$mem_ids = array();
   	$org_ids = array();
   	$api_result = civicrm_api3('MembershipType', 'get', array(
   			'sequential' => 1,
   			'is_active' => 1,
+  			'domain_id' =>  $cur_domain_id ,
   			'options' => array('sort' => "name"),
   	));
+  	 
   	
   	if( $api_result['is_error'] == 0 ){
   		$tmp_api_values = $api_result['values'];
@@ -138,12 +136,34 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	}
   
   	/* Make sure user can filter on groups and memberships  */
-  //	require_once('utils/CustomSearchTools.php');
-  //	$searchTools = new CustomSearchTools();
-  	//$group_ids = $searchTools->getRegularGroupsforSelectList();
-  
-  	//$group_ids =   CRM_Core_PseudoConstant::group();
-  
+  	$select2style = array(
+  			'multiple' => TRUE,
+  			'style' => 'width:100%; max-width: 100em;',
+  			'class' => 'crm-select2',
+  			'placeholder' => ts('- select -'),
+  	);
+  	
+  	$form->add('select', 'group_of_contact',
+  			ts('Contact is in the group(s)'),
+  			$group_ids,
+  			FALSE,
+  			$select2style
+  			);
+  	
+  	$form->add('select', 'membership_type_of_contact',
+  			ts('Contact has the membership of type(s)'),
+  			$mem_ids,
+  			FALSE,
+  			$select2style);
+  		
+  	$form->add('select', 'membership_org_of_contact',
+  			ts('Contact has Membership In'),
+  			$org_ids,
+  			FALSE,
+  			$select2style);
+  	
+  	
+  /*
   	$form->add('select', 'group_of_contact', ts('Contact is in the group'), $group_ids, FALSE,
   			array('id' => 'group_of_contact', 'multiple' => 'multiple', 'title' => ts('-- select --'))
   			);
@@ -161,6 +181,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	$form->add('select', 'membership_org_of_contact', ts('Contact has Membership In'), $org_ids, FALSE,
   			array('id' => 'membership_org_of_contact', 'multiple' => 'multiple', 'title' => ts('-- select --'))
   			);
+  			*/
   	/* end of filters for groups and memberships  */
   
   
@@ -230,16 +251,20 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	natcasesort ($accounting_code_choices);
   	 
   
-  	 
+  	
+  	$form->add('select', 'contrib_type',
+  			ts('Financial Type(s)'),
+  			$contrib_type_choices, 
+  			FALSE,
+  			$select2style);
+  	
+  	$form->add('select', 'accounting_code',
+  			ts('Accounting Code(s)'),
+  			$accounting_code_choices,
+  			FALSE,
+  			$select2style);
   
-  	$financial_type_label = "";
-  	$summary_type_label = "";
-  
-  
-  	$financial_type_label = "Financial Types";
-  	$summary_type_label = "Financial Type";
-  
-  	 
+  	 /*
   	$form->add('select', 'contrib_type', ts($financial_type_label), $contrib_type_choices, FALSE,
   			array('id' => 'contrib_type', 'multiple' => 'multiple', 'title' => ts('-- select --'))
   			);
@@ -248,7 +273,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	$form->add('select', 'accounting_code', ts('Accounting Codes'),  $accounting_code_choices, FALSE,
   			array('id' => 'accounting_code', 'multiple' => 'multiple', 'title' => ts('-- select --'))
   			);
-  	 
+  	 */
   	 
   	// TODO: Add handling for Financial Categories. 
   	//require_once( 'utils/finance/FinancialCategory.php') ;
@@ -286,12 +311,12 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	$layout_choices = array();
   	$layout_choices[''] = '  -- Select Layout -- ';
   	$layout_choices['details'] = 'Details';
-  	$layout_choices['summarize_contact_contribution_type'] = 'Summarized by Contact, '.$summary_type_label;
+  	$layout_choices['summarize_contact_contribution_type'] = 'Summarized by Contact, Financial Type';
   	$layout_choices['summarize_contact'] = 'Summarized by Contact';
   	//  $layout_choices['summarize_household_contribution_type'] = 'Summarized by Household, '.$summary_type_label;
   	//  $layout_choices['summarize_household'] = 'Summarized by Household';
   	 
-  	$layout_choices['summarize_contribution_type'] = 'Summarized by '.$summary_type_label;
+  	$layout_choices['summarize_contribution_type'] = 'Summarized by Financial Type';
   	$layout_choices['summarize_accounting_code'] = 'Summarized by Accounting Code';
   	 
   	$form->add  ('select', 'layout_choice', ts('Layout Choice'),
@@ -518,16 +543,7 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
    
   function all( $offset = 0, $rowcount = 0, $sort = null,
   		$includeContactIDs = false, $onlyIDs = false ) {
-  			 
-  			// TODO:  check authority of end-user
-  			//require_once 'utils/util_money.php';
-  			//if ( pogstone_is_user_authorized('access CiviContribute') == false ){
-  			//	return "select contact_a.id as contact_id from civicrm_contact contact_a where 1=0 ";
-  				 
-  			//}
-  			 
-  			 
-  			 
+  			  
   			$groupby = "";
   			$tmp_email_join = ""; 
   			
@@ -559,17 +575,13 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   			 
   			$grand_totals = false;
   			 
-  			// make sure selected smart groups are cached in the cache table
   			$group_of_contact = $this->_formValues['group_of_contact'];
   
-  			// TODO: Handle smart groups
-  			//require_once('utils/CustomSearchTools.php');
-  			//$searchTools = new CustomSearchTools();
-  			//$searchTools::verifyGroupCacheTable($group_of_contact ) ;
+  			
   			 
   			$where = $this->where();
   
-  			//require_once ('utils/util_money.php');
+  		
   			$tmp_order_by = "";
   			$all_contacts = true;
   			$get_contact_name = true;

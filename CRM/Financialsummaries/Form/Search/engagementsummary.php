@@ -6,21 +6,18 @@
 class CRM_Financialsummaries_Form_Search_engagementsummary extends CRM_Contact_Form_Search_Custom_Base implements CRM_Contact_Form_Search_Interface {
 
   protected $_formValues;
+  public $_permissionedComponent;
         
     function __construct( &$formValues ) {    
 
         parent::__construct($formValues);  
+        
+        // define component access permission needed
+        $this->_permissionedComponent = 'CiviContribute';
          
         $this->_formValues = $formValues;
             
-       $tmp_is_auth = user_access('access CiviContribute');
-    
-       if (  $tmp_is_auth  <> "1" ){
-       	$tmp_columns_to_show = array( ts('You are not authorized to this area' )    		=> 'sort_name', );  
-        $this->_columns = $tmp_columns_to_show; 
-        	return ; 
-       
-       }
+      
        
      
 
@@ -197,7 +194,8 @@ class CRM_Financialsummaries_Form_Search_engagementsummary extends CRM_Contact_F
          
 
         // filter for groups. 
-          $group_ids =   CRM_Core_PseudoConstant::group();  
+        $group_ids =  CRM_Core_PseudoConstant::nestedGroup();
+        
              $form->add('select', 'group_of_contact', ts('Contact in Group(s)'), $group_ids, FALSE,
           array('id' => 'group_of_contact', 'multiple' => 'multiple', 'title' => ts('-- any --'))
         );
@@ -1009,7 +1007,12 @@ $config = CRM_Core_Config::singleton( );
        $clauses[] = " ( contact_a.contact_type = 'Individual' ) ";  // Is this needed?
        $clauses[] = " ( contact_a.is_deleted <> 1 ) "; 
       
-    
+       // Check if current user is restricted to certain contacts by ACLs.
+       $acl_sql_fragment  = CRM_Contact_BAO_Contact_Permission::cacheSubquery();
+       if( strlen( $acl_sql_fragment ) > 0 ){
+       	
+       		$clauses[] = "  (  contact_a.id ".$acl_sql_fragment." ) ";
+       }
        
 
         // These are conditional filters based on user input_filters_list()

@@ -21,11 +21,14 @@ implements CRM_Contact_Form_Search_Interface {
   
   protected $_all_column_names = null;
   
+  public $_permissionedComponent;
+  
   function __construct( &$formValues ) {
   	parent::__construct( $formValues );
   
   
-  
+  	// define component access permission needed
+  	$this->_permissionedComponent = 'CiviContribute';
   
   
   	$tmp_all_priceset_options = array();
@@ -49,6 +52,8 @@ implements CRM_Contact_Form_Search_Interface {
   	}
   
   	$this->setColumns( );
+  	
+  
   
   }
   
@@ -904,18 +909,9 @@ fin_type.name as financial_type_name
   function from( ) {
   	//  print "<br>Inside from function ";
   
-  	//	fin_type
-  	require_once ('utils/Entitlement.php');
-  	$entitlement = new Entitlement();
-  
-  	$financial_type_sql = "";
-  
-  	if( $entitlement->isRunningCiviCRM_4_3()){
-  		$financial_type_sql = " LEFT JOIN civicrm_financial_type fin_type ON li.financial_type_id = fin_type.id ";
-  	}else{
-  		$financial_type_sql = " LEFT JOIN civicrm_contribution_type fin_type ON main_contrib.contribution_type_id = fin_type.id ";
-  
-  	}
+  	
+  	$financial_type_sql = " LEFT JOIN civicrm_financial_type fin_type ON li.financial_type_id = fin_type.id ";
+  	
   
   	return " FROM
  civicrm_line_item li LEFT JOIN civicrm_participant p ON p.id = li.entity_id AND li.entity_table = 'civicrm_participant'
@@ -950,8 +946,13 @@ LEFT JOIN civicrm_contact contrib_contact ON main_contrib.contact_id  = contrib_
   	// 'filter_type',  'priceset_option_id', 'priceset_option_id_lineitems'
   	$tmp_where = '';
   	$partial_sql = '';
-  	 
-  	$filter_type =  $this->_formValues['filter_type'] ;
+  	
+  	
+  	if(isset( $this->_formValues['filter_type'] ) ){
+  		$filter_type =  $this->_formValues['filter_type'] ;
+  	}else{
+  		$filter_type = "";
+  	}
   	//  print "<br>Filter type: ".$filter_type;
   	if($filter_type == 'priceset_items'){
   
@@ -993,32 +994,35 @@ LEFT JOIN civicrm_contact contrib_contact ON main_contrib.contact_id  = contrib_
   		$need_or = false;
   		$first_item = true;
   		 
-  		 
-  		foreach($this->_allChosenEvents as $curOption){
-  			// foreach($this->_allChosenPricesetOptions as $curOption){
-  			//	print "<br><br>cur option in where loop: ".$curOption;
-  			if ($curOption == 'id' ||  $curOption == 'event'|| (strlen($curOption) == 0)){
-  
-  				continue;
-  
-  			}
-  			if($first_item){
-  				$partial_sql = " ( ";
-  			}
-  			 
-  			if( $need_or){
-  				$partial_sql = $partial_sql." OR ";
-  			}
-  			// $tmp_fieldname = "price_field_".$curOption;
-  			 
-  			// $partial_sql = $partial_sql.$tmp_fieldname." > 0 ";
-  			$partial_sql = $partial_sql." e.id = ".$curOption;
-  			$first_item = false;
-  			 
-  			$need_or = true;
-  			 
-  			 
+  		if( isset( $this->_allChosenEvents ) && is_array( $this->_allChosenEvents )){ 
+		  		foreach($this->_allChosenEvents as $curOption){
+		  			// foreach($this->_allChosenPricesetOptions as $curOption){
+		  			//	print "<br><br>cur option in where loop: ".$curOption;
+		  			if ($curOption == 'id' ||  $curOption == 'event'|| (strlen($curOption) == 0)){
+		  
+		  				continue;
+		  
+		  			}
+		  			if($first_item){
+		  				$partial_sql = " ( ";
+		  			}
+		  			 
+		  			if( $need_or){
+		  				$partial_sql = $partial_sql." OR ";
+		  			}
+		  			// $tmp_fieldname = "price_field_".$curOption;
+		  			 
+		  			// $partial_sql = $partial_sql.$tmp_fieldname." > 0 ";
+		  			$partial_sql = $partial_sql." e.id = ".$curOption;
+		  			$first_item = false;
+		  			 
+		  			$need_or = true;
+		  			 
+		  			 
+		  		}
+  		
   		}
+  		
   		if($need_or ){
   			$partial_sql = $partial_sql." )  ";
   		}
@@ -1062,7 +1066,12 @@ LEFT JOIN civicrm_contact contrib_contact ON main_contrib.contact_id  = contrib_
   	 
   
   	$layout_choice =  $this->_formValues['layout_choice'];
-  	$line_item_id =  $this->_formValues['lineitem_id'];
+  	
+  	if( isset($this->_formValues['lineitem_id'] ) ){
+  		$line_item_id =  $this->_formValues['lineitem_id'];
+  	}else{
+  		$line_item_id = "";
+  	}
   	$tmp_li_sql = "";
   	// print_r($line_item_id);
   	if(is_array( $line_item_id ) && count( $line_item_id ) > 0 ){
@@ -1129,7 +1138,12 @@ LEFT JOIN civicrm_contact contrib_contact ON main_contrib.contact_id  = contrib_
   	$clauses[] =  " (main_contrib.is_test <> 1 ) ";
   	$clauses[] =  " (main_contrib.contribution_status_id = 1 )" ;
   	 
-  
+  	// Check if current user is restricted to certain contacts by ACLs.
+  	$acl_sql_fragment  = CRM_Contact_BAO_Contact_Permission::cacheSubquery();
+  	if( strlen( $acl_sql_fragment ) > 0 ){
+  		$clauses[]  = " (contact_a.id ".$acl_sql_fragment." ) ";
+  	
+  	}
   	 
   	$tmp_rtn = implode( ' AND ', $clauses );
   	 

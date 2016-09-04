@@ -283,12 +283,22 @@ if(strlen($start_date_parm) > 0){
 		    $tmp_recur_where = $tmp_recur_where." AND  c.contact_id IN ( SELECT mem.contact_id FROM civicrm_membership mem LEFT JOIN civicrm_membership_status mem_status ON mem.status_id = mem_status.id LEFT JOIN civicrm_membership_type mt ON mem.membership_type_id = mt.id WHERE mt.member_of_contact_id IN ( ".$tmp_mo." ) AND mt.is_active = '1' AND mem_status.is_current_member = '1' AND mem_status.is_active = '1' ) ";
 		    
 		
-		} 
+		}
+		
+		
+		// Check if current user is restricted to certain contacts by ACLs.
+		$acl_sql_fragment  = CRM_Contact_BAO_Contact_Permission::cacheSubquery();
+		if( strlen( $acl_sql_fragment ) > 0 ){
+			
+			$tmp_pledge_where = $tmp_pledge_where." AND  p.contact_id ".$acl_sql_fragment;
+			$tmp_contrib_where = $tmp_contrib_where." AND  c.contact_id ".$acl_sql_fragment;
+			$tmp_recur_where = $tmp_recur_where." AND  c.contact_id ".$acl_sql_fragment;			
+		}
 		
 
 	
 	
-	//print "<br>Layout choice: ".$layout_choice; 
+	
 	
 	// Get household id if needed
  if( $layout_choice == 'summarize_household_contribution_type' || $layout_choice == 'summarize_household'){

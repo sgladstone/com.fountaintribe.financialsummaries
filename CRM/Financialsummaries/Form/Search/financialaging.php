@@ -7,9 +7,13 @@ class CRM_Financialsummaries_Form_Search_financialaging extends CRM_Contact_Form
    
    
     protected $_formValues;
+    public $_permissionedComponent;
     
      function __construct( &$formValues ) {
         parent::__construct( $formValues );
+        
+        // define component access permission needed
+        $this->_permissionedComponent = 'CiviContribute';
 
        // $this->_eventID = CRM_Utils_Array::value( 'event_id',
        //                                           $this->_formValues );
@@ -99,17 +103,6 @@ class CRM_Financialsummaries_Form_Search_financialaging extends CRM_Contact_Form
         // $form->assign( 'elements', array(   'priceset_option_id'  ) );
         
         
-         // TODO: Check user authority to CiviContribute
-       /* 
-       if (is_user_authorized('access CiviContribute') == false ){
-      		 $this->setTitle('Not Authorized');
-       		return; 
-       
-       }
-
-    */
-   	
-         
 	
 	  $select2style = array(
 	      'multiple' => TRUE,
@@ -119,35 +112,31 @@ class CRM_Financialsummaries_Form_Search_financialaging extends CRM_Contact_Form
 	    );
 	    
 	
-$group_ids = array();
+	  $group_ids =  CRM_Core_PseudoConstant::nestedGroup();
 
-	    $group_result = civicrm_api3('Group', 'get', array(
-      'sequential' => 1,
-      'is_active' => 1,
-      'is_hidden' => 0,
-       'options' => array('sort' => "title"),
-    ));
+	  $cur_domain_id = "-1";
+	  	
+	  $result = civicrm_api3('Domain', 'get', array(
+	  		'sequential' => 1,
+	  		'current_domain' => "",
+	  ));
+	  	
+	  if( $result['is_error'] == 0 ){
+	  	$cur_domain_id = $result['id'];
+	  
+	  }
+	  
+	  // get membership ids and org contact ids.
+	  $mem_ids = array();
+	  $org_ids = array();
+	  $api_result = civicrm_api3('MembershipType', 'get', array(
+	  		'sequential' => 1,
+	  		'is_active' => 1,
+	  		'domain_id' =>  $cur_domain_id ,
+	  		'options' => array('sort' => "name"),
+	  ));
+	   
 
-    if( $group_result['is_error'] == 0 ){
-             $tmp_api_values = $group_result['values'];
-             foreach($tmp_api_values as $cur){
-                   $grp_id = $cur['id'];
-
-                   $group_ids[$grp_id] = $cur['title'];
-
-
-  }
-} 	
-
-
-// get membership ids and org contact ids. 
-           $mem_ids = array(); 
-           $org_ids = array();
-             $api_result = civicrm_api3('MembershipType', 'get', array(
-      'sequential' => 1, 
-'is_active' => 1,
-  'options' => array('sort' => "name"),
-        ));
 
           if( $api_result['is_error'] == 0 ){
              $tmp_api_values = $api_result['values'];
@@ -322,18 +311,7 @@ $group_ids = array();
 
     function &columns() {
     	
-    	// TODO: check if user is authorized to CiviContribute
-
-/*
     	
-       if ( is_user_authorized('access CiviContribute') == false ){
-       	$columns_to_show = array( ts('You are not authorized to this area' )    		=> 'total_amount', );  
-        $this->_columns = $columns_to_show; 
-        	return ; 
-       
-       }
-       
-*/       
     	
  	$fin_type_label  = "Financial Type"; 
  
@@ -549,14 +527,8 @@ $group_ids = array();
     function all( $offset = 0, $rowcount = 0, $sort = null,
                   $includeContactIDs = false, $onlyIDs = false ) {
        
-       // TODO: check authority of end-user
-       /*
-       if ( is_user_authorized('access CiviContribute') == false ){
-       		return "select 'You are not authorized to this area' as total_amount from  civicrm_contact where 1=0 limit 1"; 
-       		
-       }
-
-   */
+      
+       
      //   $end_date_parm  = $this->_params['end_date'] ;
         $groupby = "";
         $layout_choice = $this->_formValues['layout_choice'] ;
@@ -593,13 +565,6 @@ $group_ids = array();
 	}
     	// make sure selected smart groups are cached in the cache table
 	$group_of_contact = $this->_formValues['group_of_contact'];
-	
-
-// TODO: test with smart groups
-	//require_once('utils/CustomSearchTools.php');
-	//$searchTools = new CustomSearchTools();
-	//$searchTools::verifyGroupCacheTable($group_of_contact ) ;
-	
    
         $grand_totals = false; 
       //  print "<br> grand totals? ".$grand_totals;
@@ -964,7 +929,7 @@ CRM_Core_Error::debug_var('Aging sql:', $sql);
 	$membership_orgs_of_contact = $this->_formValues['membership_org_of_contact'];
        ///////////////////////////////////////////////////////////////////////////////
 	// Need to deal with group and membership filters. 
-	/*
+	
 	require_once('utils/CustomSearchTools.php');
 	$searchTools = new CustomSearchTools();
 		
@@ -974,10 +939,10 @@ CRM_Core_Error::debug_var('Aging sql:', $sql);
   	
 	$searchTools->updateWhereClauseForMemberships( $membership_types_of_contact,  $membership_orgs_of_contact, $contact_field_name,  $clauses   ) ; 
 	
-	*/
+	
 	////////////////////////////////////////////////////////////////////////////////
 	
-	/*
+	
 
 	// Figure out if end-user is filtering results according to groups. 
 	//require_once('utils/CustomSearchTools.php');
@@ -987,14 +952,8 @@ CRM_Core_Error::debug_var('Aging sql:', $sql);
 
 	
 	$searchTools->updateWhereClauseForCommPrefs($comm_prefs, $clauses  ) ; 
-*/
+
 	
-	/*
-	
-	
-	
-	
-	*/
 	
 	
 	$num_days_overdue = $this->_formValues['num_days_overdue'];
@@ -1051,7 +1010,14 @@ CRM_Core_Error::debug_var('Aging sql:', $sql);
                 $clauses[] = "contact_a.id IN ( $contactIDs )";
             }
         }
+        
+        
+        // Check if current user is restricted to certain contacts by ACLs.
+        $acl_sql_fragment  = CRM_Contact_BAO_Contact_Permission::cacheSubquery();
+        if( strlen( $acl_sql_fragment ) > 0 ){
+        	$clauses[] = "contact_a.id ".$acl_sql_fragment;
         	
+        }
 	
        if(count($clauses) > 0){
        		 $partial_where_clause = implode( ' AND ', $clauses );
@@ -1124,14 +1090,7 @@ CRM_Core_Error::debug_var('Aging sql:', $sql);
    
 
    function summary( ) {
-   	// TODO: Check if user is authorized to CiviContribute
-   	
-   	
-      // if ( is_user_authorized('access CiviContribute') == false ){
-        // print "<br>Not Authorized"; 
-      // 		return ; 
-       
-      // }
+   
    	
    	$sum_array = array();
    	

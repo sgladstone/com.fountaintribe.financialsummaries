@@ -9,13 +9,13 @@
     <email>info@fountaintribe.com</email>
   </maintainer>
   <urls>
-    <url desc="Main Extension Page">http://fountaintribe.com</url>
-    <url desc="Documentation">http://fountaintribe.com</url>
-    <url desc="Support">http://fountaintribe.com</url>
+    <url desc="Main Extension Page">https://civicrm.org/extensions/financial-summaries</url>
+    <url desc="Documentation">https://civicrm.org/extensions/financial-summaries</url>
+    <url desc="Support">https://github.com/sgladstone/com.fountaintribe.financialsummaries/issues</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
   <releaseDate>2016-05-21</releaseDate>
-  <version>1.6</version>
+  <version>1.7</version>
   <develStage>beta</develStage>
   <compatibility> 
     <ver>4.6</ver>
