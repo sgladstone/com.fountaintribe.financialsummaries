@@ -36,9 +36,11 @@ class CRM_Financialsummaries_Form_Search_engagementsummary extends CRM_Contact_F
                                  
                                  
                                  
-
-                         $contrib_year = $this->_formValues['contrib_year']; 
-                         
+					if( isset($this->_formValues['contrib_year'])){
+	                    $contrib_year = $this->_formValues['contrib_year']; 
+					}else{
+						$contrib_year = array();
+					}
                          
                         // if( $config_style == "Alumni Membership Organization"){
                            if( 1 ==0 ){	
@@ -266,6 +268,8 @@ $config = CRM_Core_Config::singleton( );
   $formatted_fisc = $month_name." ".$fyDate; 
          $all_contrib_years = $this->getListContribYears() ;
          
+       //  $form->addElement('select', 'contrib_year', ts('Contribution Fiscal Year(s) (starts '.$formatted_fisc.')'), $all_contrib_years);
+         
          
          $form->add('select', 'contrib_year',
          		ts('Contribution Fiscal Year(s) (starts '.$formatted_fisc.')'),
@@ -273,6 +277,7 @@ $config = CRM_Core_Config::singleton( );
          		FALSE,
          		$select2style
          		);
+         		
          
          /*
        $form->add('select', 'contrib_year', ts('Contribution Fiscal Year(s) (starts '.$formatted_fisc.')'), $all_contrib_years, FALSE,
@@ -718,8 +723,8 @@ $config = CRM_Core_Config::singleton( );
    $tmp_fiscal_config=  $config->fiscalYearStart;
   
   
-  $fyDate = $tmp_fiscal_config[d];
-  $fyMonth = $tmp_fiscal_config[M]; 
+  $fyDate = $tmp_fiscal_config['d'];
+  $fyMonth = $tmp_fiscal_config['M']; 
   
   //$fyYear  = CRM_Utils_Date::calculateFiscalYear( $fyDate, $fyMonth  );
   
