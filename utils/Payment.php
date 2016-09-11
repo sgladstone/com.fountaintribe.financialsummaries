@@ -562,8 +562,7 @@ $third_party_col_name  =  $outCustomColumnNames[$custom_field_third_party_label]
        return; 
  }
 
-	require_once ('utils/Entitlement.php');
-		$entitlement = new Entitlement();
+	
 		
 		 $third_party_sql = "";
 		

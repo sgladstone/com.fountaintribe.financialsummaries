@@ -225,43 +225,10 @@ function getDrupalModuleVersion($module_name){
 }
 
 
-function isRunningDrupal6(){
-
-	$full_version =  VERSION;
-	// $full_version = $this->getCMSVersion();
-
-	if( substr( $full_version , 0 , 1) == "6" ){
-
-		return true;
-	}else{
-		return false;
-	}
 
 
 
-}
 
-
-/**************************************************************************************/
-function getCiviCRMversion(){
-
-	$sql = "select version from civicrm_domain";
-	$return_val = false;
-	$dao =& CRM_Core_DAO::executeQuery( $sql,   CRM_Core_DAO::$_nullArray ) ;
-
-	while($dao->fetch()){
-		$tmp_version = $dao->version;
-			
-		//print "<br>Civi version: ".$tmp_version;
-		$return_val = $tmp_version;
-			
-	}
-
-	$dao->free();
-	return $return_val;
-
-
-}
 
 /**************************************************************************************/
 

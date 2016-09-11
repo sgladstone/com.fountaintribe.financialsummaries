@@ -241,12 +241,6 @@ if(strlen($start_date_parm) > 0){
   	$tmp_recur_where = $tmp_recur_where." AND date(c.receive_date) <= date('".$end_date_parm."')";
   }	
 }
-
-  //require_once ('utils/Entitlement.php');
-   //     $entitlement = new Entitlement();
-       
-       // print "<br> financial type parms: ".$financial_types_parm; 
-        
         
         	if( sizeof($contactIDs) > 0 ){
         		//$tmp_cids = implode( ",", $contactIDs );
@@ -335,9 +329,7 @@ if(strlen($start_date_parm) > 0){
     
     
     
-   // print "<br>prepayment sql: ".$tmp_exclude_prepays_sql; 
-   //require_once ('utils/Entitlement.php');
-    //    $entitlement = new Entitlement();
+   
         $financial_type_sql = "";
         
     

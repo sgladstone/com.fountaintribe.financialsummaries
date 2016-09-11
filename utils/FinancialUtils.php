@@ -2174,10 +2174,9 @@ GROUP BY pp.pledge_id";
 		if( $entity_type == 'contribution'){
 			print "<br><h2>ERROR: entity_type: contribution NOT supported.</h2>";
 			return "";
-			require_once ('utils/Entitlement.php');
-			$entitlement = new Entitlement();
+			
 	
-		 if( $entitlement->isRunningCiviCRM_4_3()){
+		
 		 	 
 		 	 
 		 	if(strlen( $line_item_id) == 0 ){
@@ -2222,7 +2221,10 @@ GROUP BY pp.pledge_id";
 	
 	)";
 	
-		 }else{
+		
+		 
+		 /*
+		 else{
 		 	$sql_str = "SELECT contrib.total_amount,
    	contrib.receipt_date, contrib.currency, contrib.source, val.label
 	FROM civicrm_contribution contrib  ,
@@ -2240,6 +2242,8 @@ GROUP BY pp.pledge_id";
 	
 	
 		 }
+		 
+		 */
 	
 	
 		}else if($entity_type == 'pledge'){
