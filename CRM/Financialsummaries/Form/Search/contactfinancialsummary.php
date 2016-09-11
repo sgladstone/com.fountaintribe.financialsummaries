@@ -80,60 +80,14 @@ class CRM_Financialsummaries_Form_Search_contactfinancialsummary extends CRM_Con
   	 */
   	 
   
-  	/*
-  	 require_once 'utils/util_money.php';
-  	if ( pogstone_is_user_authorized('access CiviContribute') == false ){
-  		$this->setTitle('Not Authorized');
-  		return;
-  		 
-  	}
-  	
-  	*/
-  
   	
   	$group_ids =  CRM_Core_PseudoConstant::nestedGroup();
   	
-  	$cur_domain_id = "-1";
-  		
-  	$result = civicrm_api3('Domain', 'get', array(
-  			'sequential' => 1,
-  			'current_domain' => "",
-  	));
-  		
-  	if( $result['is_error'] == 0 ){
-  		$cur_domain_id = $result['id'];
-  	
-  	}
-  	// get membership ids and org contact ids.
   	$mem_ids = array();
   	$org_ids = array();
-  	$api_result = civicrm_api3('MembershipType', 'get', array(
-  			'sequential' => 1,
-  			'is_active' => 1,
-  			'domain_id' =>  $cur_domain_id ,
-  			'options' => array('sort' => "name"),
-  	));
-  	 
   	
-  	if( $api_result['is_error'] == 0 ){
-  		$tmp_api_values = $api_result['values'];
-  		foreach($tmp_api_values as $cur){
-  	
-  			$tmp_id = $cur['id'];
-  			$mem_ids[$tmp_id] = $cur['name'];
-  			 
-  			$org_id = $cur['member_of_contact_id'];
-  			// get display name of org
-  			$result = civicrm_api3('Contact', 'getsingle', array(
-  					'sequential' => 1,
-  					'id' => $org_id ,
-  			));
-  			$org_ids[$org_id] = $result['display_name'];
-  	
-  			 
-  		}
-  	
-  	}
+  	require_once( 'utils/CustomSearchTools.php');
+  	CustomSearchTools::fillMembershipTypeArrays( $mem_ids,  $org_ids);
   
   	/* Make sure user can filter on groups and memberships  */
   	$select2style = array(
