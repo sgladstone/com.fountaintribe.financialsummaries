@@ -10,8 +10,8 @@ class FinancialDates{
 		//print_r($config);
 		$tmp_fiscal_config=  $config->fiscalYearStart;
 	
-		$fyDate = $tmp_fiscal_config[d];
-		$fyMonth = $tmp_fiscal_config[M];
+		$fyDate = $tmp_fiscal_config['d'];
+		$fyMonth = $tmp_fiscal_config['M'];
 	
 		$fyYear  = CRM_Utils_Date::calculateFiscalYear( $fyDate, $fyMonth  );
 	

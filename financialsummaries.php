@@ -68,6 +68,8 @@ function  financialsummaries_civicrm_tokenValues( &$values, &$contactIDs, $job =
 		require_once('utils/Prepayment.php');
 		$tmpPrepayment = new Prepayment();
 	
+		
+		$tmp_token_format = ""; 
 		while( $cur_finances_token_raw = current( $tokens['finances'] )){
 			//print "<br>";
 			//print "key: ".key($tokens['finances']);
@@ -201,9 +203,9 @@ function  financialsummaries_civicrm_tokenValues( &$values, &$contactIDs, $job =
 			}else if( $partial_token  == 'contributions' ){
 				//$date_range = 'cur_fiscal_year';
 				$output_wanted = "detail_table";
-				require_once('utils/finance/Payment.php');
+				require_once('utils/Payment.php');
 				$tmpPayment = new Payment();
-				$tmpPayment->getContributionDetails($values, $contactIDs,  $ct_prefix_id, $token_to_fill, $output_wanted, $start_date, $end_date);
+				$tmpPayment->getContributionDetails($values, $contactIDs,  $ct_prefix_id, $token_to_fill, $output_wanted, $start_date, $end_date, $tmp_token_format);
 				 
 			}else if($partial_token  == 'adjustments'){
 				//$date_range = 'cur_fiscal_year';

@@ -3,9 +3,11 @@
    class Payment{
 
 /*************************************************************/
-   	function getContributionDetails(&$values, &$contactIDs,  &$ct_type_prefix_id, &$token_to_fill, &$output_wanted, &$start_date , &$end_date, &$token_format ){
+   	function getContributionDetails(&$values, &$contactIDs,  &$ct_type_prefix_id,
+   			&$token_to_fill, &$output_wanted, &$start_date , &$end_date, &$token_format ){
    		
-
+   		//CRM_Core_Error::debug("Inside getContributionDetails: ", $contactIDs);
+   				$tmp_exclude_prepays_sql = ""; 
    if( count($contactIDs) == 0 ){
 	// no contacts, nothing to do. 
  	return; 
@@ -54,15 +56,29 @@
 
 $error_msg = getCustomTableFieldNames($custom_field_group_label, $customFieldLabels, $extra_contrib_info_table_sql, $outCustomColumnNames ) ;
 
-$third_party_col_name  =  $outCustomColumnNames[$custom_field_third_party_label];
+	if( isset( $outCustomColumnNames[$custom_field_third_party_label] )){
+		$third_party_col_name  =  $outCustomColumnNames[$custom_field_third_party_label];
+   	}else{
+   		$third_party_col_name  = "";
+   	}
 
+
+$sql_str = "";
  if(strlen( $third_party_col_name) == 0){
       // print "<br>Error: There is no field with the name: '$custom_field_third_party_label' ";
-       return; 
- }
+       //return; 
+    // With newer soft-credit flexibility, no longer a need for a custom table.    
+ 	$third_party_sql_part_a = "";
+ 	$third_party_sql_part_b = "";
+ 	
+ 	$tmp_legacy_3rd_party_from = "";
+ 	$tmp_legacy_3rd_party_where = "";
+ 	
+ 	
+ }else{
 
-		
-		$sql_str = "";
+	  $tmp_legacy_3rd_party_from = " LEFT JOIN ".$extra_contrib_info_table_sql." as contrib_info ON contrib.id = contrib_info.entity_id "  ; 
+      $tmp_legacy_3rd_party_where = " AND contrib_info.".$third_party_col_name." IS NULL ";
 		
 		
 			$third_party_sql_part_a = "SELECT contrib.id as contrib_id , contrib_info.".$third_party_col_name." as contact_id, ct.name as contrib_type , li.line_total as total_amount,
@@ -111,14 +127,15 @@ AND contrib_info.".$third_party_col_name." in (  $cid_list )
 and contrib.contribution_status_id = valA.value AND 
 valA.name IN ('Completed' , 'Refunded' ) and contrib.is_test = 0";
 
-
+ }
+ 
+ 
 	$participant_contributions_sql = "SELECT  contrib.id as contrib_id ,contrib.contact_id as contact_id, ct.name as contrib_type , sum(li.line_total) as total_amount, 
 	month( contrib.receive_date ) as mm_date, day(contrib.receive_date ) as dd_date , year(contrib.receive_date ) as yyyy_date, 
 	contrib.currency, contrib.source, valA.label, valA.name as contrib_status_name, '' as pay_method, contrib.check_number, contrib.receive_date, '' as paid_for_contact ,  '' as rec_type_desc
 	FROM civicrm_line_item li JOIN civicrm_participant part ON li.entity_id = part.id AND li.entity_table =  'civicrm_participant' 
 	 JOIN civicrm_participant_payment ep ON ifnull( part.registered_by_id, part.id) = ep.participant_id 
-				join civicrm_contribution contrib ON  ep.contribution_id = contrib.id 
-	 LEFT JOIN ".$extra_contrib_info_table_sql." as contrib_info ON contrib.id = contrib_info.entity_id ,
+				join civicrm_contribution contrib ON  ep.contribution_id = contrib.id ".$tmp_legacy_3rd_party_from." ,
 	   civicrm_financial_type ct, 
 	 civicrm_option_value valA, civicrm_option_group grpA 
 	WHERE 
@@ -128,9 +145,8 @@ valA.name IN ('Completed' , 'Refunded' ) and contrib.is_test = 0";
 	 ( ct.name NOT LIKE 'adjustment-%'  AND  ct.name NOT LIKE '%---adjustment-%' ) ".$tmp_contrib_type_ids_for_sql." 
 	AND contrib.total_amount <> 0 
 	AND contrib.contact_id in (  $cid_list ) and contrib.contribution_status_id = valA.value AND 
-	valA.name IN ('Completed' , 'Refunded' ) and contrib.is_test = 0
-	AND contrib_info.".$third_party_col_name." IS NULL
-	group by contrib.id, ct.id " ; 			
+	valA.name IN ('Completed' , 'Refunded' ) and contrib.is_test = 0 ".$tmp_legacy_3rd_party_where.
+	" group by contrib.id, ct.id " ; 			
 				
 				
 	$participant_refund_sql = "SELECT  contrib.id as contrib_id ,contrib.contact_id as contact_id, ct.name as contrib_type , ( 0 - sum(li.line_total)) as total_amount, 
@@ -138,8 +154,7 @@ valA.name IN ('Completed' , 'Refunded' ) and contrib.is_test = 0";
 	contrib.currency, contrib.source, valA.label, valA.name as contrib_status_name, '' as pay_method, contrib.check_number, contrib.cancel_date as receive_date , '' as paid_for_contact ,  'refund_detail'  as rec_type_desc
 	FROM civicrm_line_item li JOIN civicrm_participant part ON li.entity_id = part.id AND li.entity_table =  'civicrm_participant' 
 	 JOIN civicrm_participant_payment ep ON ifnull( part.registered_by_id, part.id) = ep.participant_id 
-				join civicrm_contribution contrib ON  ep.contribution_id = contrib.id 
-	 LEFT JOIN ".$extra_contrib_info_table_sql." as contrib_info ON contrib.id = contrib_info.entity_id ,
+				join civicrm_contribution contrib ON  ep.contribution_id = contrib.id ".$tmp_legacy_3rd_party_from." ,
 	   civicrm_financial_type ct, 
 	 civicrm_option_value valA, civicrm_option_group grpA 
 	WHERE 
@@ -149,17 +164,15 @@ valA.name IN ('Completed' , 'Refunded' ) and contrib.is_test = 0";
 	 ( ct.name NOT LIKE 'adjustment-%'  AND  ct.name NOT LIKE '%---adjustment-%' ) ".$tmp_contrib_type_ids_for_sql." 
 	AND contrib.total_amount <> 0 
 	AND contrib.contact_id in (  $cid_list ) and contrib.contribution_status_id = valA.value AND 
-	valA.name IN ( 'Refunded' ) and contrib.is_test = 0
-	AND contrib_info.".$third_party_col_name." IS NULL
-	group by contrib.id, ct.id " ; 				
+	valA.name IN ( 'Refunded' ) and contrib.is_test = 0 ".$tmp_legacy_3rd_party_where.
+	" group by contrib.id, ct.id " ; 				
 		//print "<br><br> participant REFUND contrib sql: ".$participant_refund_sql; 		
 				
 		
     $refund_details_sql = "SELECT contrib.id as contrib_id , contrib.contact_id as contact_id, ct.name as contrib_type , ( 0 - li.line_total ) as total_amount, 
 month( contrib.cancel_date ) as mm_date, day(contrib.cancel_date ) as dd_date , year(contrib.cancel_date ) as yyyy_date,  
  contrib.currency, contrib.source, valA.label, valA.name as contrib_status_name,  valB.label as pay_method, contrib.check_number, contrib.cancel_date as receive_date, '' as paid_for_contact, 'refund_detail' as rec_type_desc
-	FROM civicrm_line_item li JOIN civicrm_contribution contrib ON  li.entity_id = contrib.id AND li.entity_table = 'civicrm_contribution'
-        LEFT JOIN ".$extra_contrib_info_table_sql." as contrib_info ON contrib.id = contrib_info.entity_id, 
+	FROM civicrm_line_item li JOIN civicrm_contribution contrib ON  li.entity_id = contrib.id AND li.entity_table = 'civicrm_contribution'  ".$tmp_legacy_3rd_party_from.", 
 	civicrm_financial_type ct,
 	civicrm_option_value valA, 
 	civicrm_option_group grpA,
@@ -180,8 +193,7 @@ month( contrib.cancel_date ) as mm_date, day(contrib.cancel_date ) as dd_date , 
 	AND contrib.contact_id in ( $cid_list )
 	AND contrib.contribution_status_id = valA.value
 	AND valA.name IN ('Refunded' )
-	AND contrib.is_test = 0 
-        AND contrib_info.".$third_party_col_name." IS NULL ";
+	AND contrib.is_test = 0 ".$tmp_legacy_3rd_party_where;
          
          
           $tmp_first_contrib = " select contrib.id , contrib.contact_id ,contrib.source, contrib.currency, contrib.check_number, 
@@ -230,7 +242,7 @@ month( contrib.cancel_date ) as mm_date, day(contrib.cancel_date ) as dd_date , 
 	FROM 
 	civicrm_line_item li JOIN ( $tmp_first_contrib ) contrib ON  li.entity_id = contrib.id AND li.entity_table = 'civicrm_contribution'
 	JOIN civicrm_contribution rcontribs ON rcontribs.contribution_recur_id = contrib.contribution_recur_id AND rcontribs.contribution_status_id = 1
-        LEFT JOIN ".$extra_contrib_info_table_sql." as contrib_info ON contrib.id = contrib_info.entity_id ,
+        ".$tmp_legacy_3rd_party_from." ,
 	civicrm_financial_type ct,
 	civicrm_option_value valA, 
 	civicrm_option_group grpA,
@@ -252,15 +264,13 @@ month( contrib.cancel_date ) as mm_date, day(contrib.cancel_date ) as dd_date , 
 	AND contrib.contribution_status_id = valA.value
 	AND valA.name IN ('Completed', 'Refunded' )
 	AND contrib.is_test = 0 
-	AND contrib.contribution_recur_id IS NOT NULL
-        AND contrib_info.".$third_party_col_name." IS NULL              
-        ";
+	AND contrib.contribution_recur_id IS NOT NULL ".$tmp_legacy_3rd_party_where;
       
       $regular_contribs_sql_part_a = "SELECT contrib.id as contrib_id , contrib.contact_id as contact_id, ct.name as contrib_type , li.line_total as total_amount, 
 month( contrib.receive_date ) as mm_date, day(contrib.receive_date ) as dd_date , year(contrib.receive_date ) as yyyy_date,  
  contrib.currency, contrib.source, valA.label, valA.name as contrib_status_name,  valB.label as pay_method, contrib.check_number, contrib.receive_date, '' as paid_for_contact, '' as rec_type_desc
 	FROM civicrm_line_item li JOIN civicrm_contribution contrib ON  li.entity_id = contrib.id AND li.entity_table = 'civicrm_contribution'
-        LEFT JOIN ".$extra_contrib_info_table_sql." as contrib_info ON contrib.id = contrib_info.entity_id, 
+        ".$tmp_legacy_3rd_party_from.", 
 	civicrm_financial_type ct,
 	civicrm_option_value valA, 
 	civicrm_option_group grpA,
@@ -282,14 +292,13 @@ month( contrib.receive_date ) as mm_date, day(contrib.receive_date ) as dd_date 
 	AND contrib.contribution_status_id = valA.value
 	AND valA.name IN ('Completed', 'Refunded' )
 	AND contrib.is_test = 0 
-	AND contrib.contribution_recur_id IS NULL
-        AND contrib_info.".$third_party_col_name." IS NULL";
+	AND contrib.contribution_recur_id IS NULL ".$tmp_legacy_3rd_party_where;
       
       $regular_contribs_sql_part_b = " SELECT contrib.id as contrib_id , contrib.contact_id as contact_id, ct.name as contrib_type , li.line_total as total_amount, 
 	month( contrib.receive_date ) as mm_date, day(contrib.receive_date ) as dd_date , year(contrib.receive_date ) as yyyy_date, 
 	contrib.currency, contrib.source, valA.label, valA.name as contrib_status_name, '' as pay_method, contrib.check_number, contrib.receive_date, '' as paid_for_contact,  '' as rec_type_desc
  FROM civicrm_line_item li join civicrm_contribution contrib ON  li.entity_id = contrib.id AND li.entity_table = 'civicrm_contribution'
- LEFT JOIN ".$extra_contrib_info_table_sql." as contrib_info ON contrib.id = contrib_info.entity_id ,
+ ".$tmp_legacy_3rd_party_from." ,
    civicrm_financial_type ct, 
  civicrm_option_value valA, civicrm_option_group grpA 
 WHERE 
@@ -302,20 +311,27 @@ AND contrib.total_amount <> 0
 AND contrib.contact_id in (  $cid_list ) and contrib.contribution_status_id = valA.value AND 
 valA.name IN ('Completed', 'Refunded' ) 
 AND contrib.is_test = 0 
-AND contrib.contribution_recur_id IS NULL
-AND contrib_info.".$third_party_col_name." IS NULL ";   
+AND contrib.contribution_recur_id IS NULL ".$tmp_legacy_3rd_party_where;   
 
     
-    require_once( 'utils/finance/Prepayment.php');
+    require_once( 'utils/Prepayment.php');
     $tmpPrepayment = new Prepayment();
     $tmp_exclude_prepays_sql = $tmpPrepayment->getExcludePrepaymentsSQL();
     
+    
+    if( strlen($third_party_sql_part_a) > 0 && strlen($third_party_sql_part_b ) > 0 ){
+    	$legacy_3rd_party_union =  " UNION ALL ( ".$third_party_sql_part_a." )
+  									UNION ALL ( ".$third_party_sql_part_b." )  ";
+    	
+    	
+    }else{
+    	
+    	$legacy_3rd_party_union = "";
+    }
     // Put it all together
 $sql_str ="select t1.*, t2.symbol from (
   ( ".$regular_contribs_sql_part_a."  )
-  UNION ALL ( ".$regular_contribs_sql_part_b."  )
-  UNION ALL ( ".$third_party_sql_part_a." )
-  UNION ALL ( ".$third_party_sql_part_b." )
+  UNION ALL ( ".$regular_contribs_sql_part_b."  ) ".$legacy_3rd_party_union."
   UNION ALL ( ".$participant_contributions_sql." )
   UNION ALL ( ".$refund_details_sql." )
   UNION ALL ( ".$participant_refund_sql." ) 
@@ -443,6 +459,8 @@ $dao =& CRM_Core_DAO::executeQuery( $sql_str,   CRM_Core_DAO::$_nullArray ) ;
 	       $contrib_id."&cid=".$cur_cid."&action=view&context=contribution&selectedChild=contribute";
 	       
 	       $detail_link = " <a href='".$detail_url."'>(detail)</a>"; 
+       }else{
+       	$detail_link = "";
        }
       
       $tmp_completed_detail_rows[$cur_cid] = $tmp_completed_detail_rows[$cur_cid]."<tr class=".$css_name."><td ".$tt_style." width='10%'>".$tmp_date_formated."</td><td ".$tt_style." width='50%'>".$tmp_description.$paid_for_description.$refunded_desc.$detail_link."</td><td width='20%' ".$num_style.">".$total_formated."</td></tr>";
@@ -470,10 +488,19 @@ $dao =& CRM_Core_DAO::executeQuery( $sql_str,   CRM_Core_DAO::$_nullArray ) ;
   	 $rel_ids = $tmpRelTools->get_all_permissioned_ids($cid);
       
 	    
-          foreach($rel_ids as $rel_cid){
+    foreach($rel_ids as $rel_cid){
   	   
-  	    $tmp_html = $tmp_html.$tmp_completed_detail_rows[$rel_cid];
-  	    $tmp_sub = $tmp_sub + $tmp_completed_sub_total[$rel_cid];
+    	if( isset( $tmp_completed_detail_rows[$rel_cid] )){
+  	    	$tmp_html = $tmp_html.$tmp_completed_detail_rows[$rel_cid];
+    	}else{
+    		
+    	}
+    	
+    	if( isset( $tmp_completed_sub_total[$rel_cid] )){
+  	    	$tmp_sub = $tmp_sub + $tmp_completed_sub_total[$rel_cid];
+    	}else{
+    		
+    	}
   	    
   	}
   	
@@ -502,7 +529,11 @@ $dao =& CRM_Core_DAO::executeQuery( $sql_str,   CRM_Core_DAO::$_nullArray ) ;
   }
   
  $format = '';
- populate_default_value(  $values, $contactIDs , $token_to_fill, $token_to_fill,   "Nothing Found for this contact", $format); 
+ 
+ require_once ('utils/FinancialUtils.php');
+ $tmpFinUtils = new FinancialUtils();
+ 
+ $tmpFinUtils->populate_default_value(  $values, $contactIDs , $token_to_fill, $token_to_fill,   "Nothing Found for this contact", $format); 
  
  $money_format = 'USDmoney' ; 
  //populate_default_value(  $values, $contactIDs , $token_bal_short, $token_bal_long,   $total_of_everything, $money_format);
