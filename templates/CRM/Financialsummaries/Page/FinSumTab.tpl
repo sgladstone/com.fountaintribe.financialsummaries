@@ -10,9 +10,11 @@
   {/if} 
   </td></tr>
   
-  {if $count_unpaid_pledges <> "0"}
+  {if $count_unpaid_pledges <> "0" }
+    {if strlen( $paybal_page_id ) > 0 }
 <tr><td><a class='button' href='/civicrm/contribute/transact?reset=1&id={$paybal_page_id}&cid={$cid}' target='_new'>Pay Existing Balance(s) Using Installments or In Full</a>
 </td></tr>
+  {/if}
 {/if}
   </table>
   {if $count_ach_pages > 0 }
