@@ -583,7 +583,7 @@ class CRM_Financialsummaries_Form_Search_financialaging extends CRM_Contact_Form
 	
 	//print "<br><br>full sql: ". $sql; 
 
-CRM_Core_Error::debug_var('Aging sql:', $sql);	
+    //CRM_Core_Error::debug_var('Aging sql:', $sql);	
         return $sql;
 	                  
     
