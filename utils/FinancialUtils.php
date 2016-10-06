@@ -2263,17 +2263,21 @@ AND grp.name = 'contribution_status'
 and p.is_test = 0
 	order by 1";
 		}else if( $entity_type == 'recurring'){
+			// TODO: determine balance for recurring contribss.  
+			/*
 			$sql_str = "SELECT (li.line_total * t2.missing_count) as total_amount,
    		contrib.receipt_date, contrib.currency, contrib.source
 	FROM civicrm_line_item li
 	JOIN civicrm_contribution contrib ON li.entity_id = contrib.id AND li.entity_table = 'civicrm_contribution'
 	LEFT JOIN (select r.id as recur_id ,  count( contrib.id) as missing_count
                   		FROM `civicrm_contribution_recur` r
-                  		LEFT JOIN civicrm_pogstone_recurring_contribution contrib on r.id = contrib.contribution_recur_id
+                  		LEFT JOIN civicrm_fountaintribe_recurring_contribution contrib on r.id = contrib.contribution_recur_id
 				WHERE contrib.receive_date < DATE( now( ) )
 				GROUP BY r.id ) as t2 ON t2.recur_id = contrib.contribution_recur_id
 	WHERE
 	li.id = ".$line_item_id."   ";
+	
+	*/
 	
 		}else{
 			print "<br>Unknown entity type: ".$entity_type;
