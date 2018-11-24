@@ -79,7 +79,7 @@ class FormattingUtils{
 		$month;
 		$day;
 		if($input_format == 'yyyy-mm-dd'){
-			list($year, $month, $day) = split('[/.-]', $parm);
+			list($year, $month, $day) = explode('[/.-]', $parm);
 			 
 		}else if($input_format == 'yyyymmdd'){
 			$year = substr($parm, 0, 4);
@@ -124,7 +124,7 @@ class FormattingUtils{
 		$month;
 		$day;
 		if($input_format == 'yyyy-mm-dd'){
-			list($year, $month, $day) = split('[/.-]', $parm);
+			list($year, $month, $day) = explode('[/.-]', $parm);
 			 
 		}else if($input_format == 'yyyymmdd'){
 			$year = substr($parm, 0, 4);
