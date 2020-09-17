@@ -252,14 +252,15 @@ function  financialsummaries_civicrm_tokenValues( &$values, &$contactIDs, $job =
 	
 }
 
-
-function financialsummaries_civicrm_tabs( &$tabs, $contactID ) {
+/**
+ * Implements hook_civicrm_tabset().
+ */
+function financialsummaries_civicrm_tabset($tabsetName, &$tabs, $context) {
 // if (pogstone_is_user_authorized('access CiviContribute')){
-	if ( 1==1){
+	if ($tabsetName === 'civicrm/contact/view' && !empty($context['contact_id'])) {
 
-
-	$contactIds = array();
-	$contactIds[] = $contactID;
+	$contactID = $context['contact_id'];
+	$contactIds = [$contactID];
 
 	$token_format = "backoffice_screen";
 
@@ -285,11 +286,13 @@ function financialsummaries_civicrm_tabs( &$tabs, $contactID ) {
 
 	$url = CRM_Utils_System::url( 'civicrm/fountaintribe/fstab',
 			"reset=1&snippet=1&force=1&cid=$contactID" );
-	$tabs[] = array( 'id'    => 'mySupercoolTab',
+	$tabs[] = [ 'id'    => 'financialsummaries',
 			'url'   => $url,
 			'title' => 'Financial Summary',
 			'count' => $count_parm,
-			'weight' => 1 );
+			'weight' => 1,
+		   	'icon' => 'crm-i fa-money',
+		  ];
 	 
 }
 
