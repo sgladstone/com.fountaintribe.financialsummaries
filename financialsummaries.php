@@ -252,14 +252,15 @@ function  financialsummaries_civicrm_tokenValues( &$values, &$contactIDs, $job =
 	
 }
 
-
-function financialsummaries_civicrm_tabs( &$tabs, $contactID ) {
+/**
+ * Implements hook_civicrm_tabset().
+ */
+function financialsummaries_civicrm_tabset($tabsetName, &$tabs, $context) {
 // if (pogstone_is_user_authorized('access CiviContribute')){
-	if ( 1==1){
+	if ($tabsetName === 'civicrm/contact/view') {
 
-
-	$contactIds = array();
-	$contactIds[] = $contactID;
+	$contactID = $context['contact_id'];
+	$contactIds = [$contactID];
 
 	$token_format = "backoffice_screen";
 
@@ -277,19 +278,21 @@ function financialsummaries_civicrm_tabs( &$tabs, $contactID ) {
 
 	$tmpFinancialUtils->process_obligation_with_balances_subtotals_tokens2($values, $contactIds, $ct_prefix_id ,$token_amount_due_long ,  $need_subtotals,  $token_format, $today_date,$default_start_date,  $need_due_column, $default_exclude_after_date, $output_wanted, $include_closed_items, $where_clause_sql );
 
-	$amount_due_by_today = $values[$contactID][$token_amount_due_long];
+	$amount_due_by_today = $values[$contactID][$token_amount_due_long] ?? '';
 	 
-	$count_parm = $amount_due_by_today." due";
+	$count_parm = $amount_due_by_today;
 	//$count_parm = "0";
 
 
 	$url = CRM_Utils_System::url( 'civicrm/fountaintribe/fstab',
 			"reset=1&snippet=1&force=1&cid=$contactID" );
-	$tabs[] = array( 'id'    => 'mySupercoolTab',
+	$tabs[] = [ 'id'    => 'financialsummaries',
 			'url'   => $url,
 			'title' => 'Financial Summary',
 			'count' => $count_parm,
-			'weight' => 1 );
+			'weight' => 1,
+		   	'icon' => 'crm-i fa-money',
+		  ];
 	 
 }
 
