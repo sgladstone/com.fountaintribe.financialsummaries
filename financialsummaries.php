@@ -257,7 +257,7 @@ function  financialsummaries_civicrm_tokenValues( &$values, &$contactIDs, $job =
  */
 function financialsummaries_civicrm_tabset($tabsetName, &$tabs, $context) {
 // if (pogstone_is_user_authorized('access CiviContribute')){
-	if ($tabsetName === 'civicrm/contact/view' && !empty($context['contact_id'])) {
+	if ($tabsetName === 'civicrm/contact/view') {
 
 	$contactID = $context['contact_id'];
 	$contactIds = [$contactID];
@@ -278,9 +278,9 @@ function financialsummaries_civicrm_tabset($tabsetName, &$tabs, $context) {
 
 	$tmpFinancialUtils->process_obligation_with_balances_subtotals_tokens2($values, $contactIds, $ct_prefix_id ,$token_amount_due_long ,  $need_subtotals,  $token_format, $today_date,$default_start_date,  $need_due_column, $default_exclude_after_date, $output_wanted, $include_closed_items, $where_clause_sql );
 
-	$amount_due_by_today = $values[$contactID][$token_amount_due_long];
+	$amount_due_by_today = $values[$contactID][$token_amount_due_long] ?? '';
 	 
-	$count_parm = $amount_due_by_today." due";
+	$count_parm = $amount_due_by_today;
 	//$count_parm = "0";
 
 
